@@ -1,5 +1,6 @@
 #![no_std]
 
+mod altitude;
 mod aoa;
 mod data_source;
 mod drawable;
