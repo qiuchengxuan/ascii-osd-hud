@@ -1,0 +1,16 @@
+[package]
+name = "ascii-osd-hud"
+description = "Ascii based OSD HUD implemention"
+version = "0.1.0"
+authors = ["qiuchengxuan <qiuchengxuan@gmail.com>"]
+edition = "2018"
+license = "Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+enum-map = {version = "0.6.2", default-features = false}
+numtoa = "0.2.3"
+
+[dev-dependencies]
+ascii = "1.0"
