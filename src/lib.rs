@@ -5,6 +5,7 @@ mod aoa;
 mod drawable;
 mod heading_tape;
 pub mod hud;
+mod speed;
 pub mod symbol;
 mod telemetry;
 #[cfg(test)]

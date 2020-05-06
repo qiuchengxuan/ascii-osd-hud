@@ -4,17 +4,20 @@ use crate::altitude::Altitude;
 use crate::aoa::AOA;
 use crate::drawable::{Align, Drawable};
 use crate::heading_tape::HeadingTape;
+use crate::speed::Speed;
 use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
 
 #[derive(Enum)]
 pub enum Displayable {
+    Speed,
     AOA,
     Altitude,
     HeadingTape,
 }
 
 pub struct HUD<'a> {
+    speed: Speed,
     aoa: AOA,
     altitude: Altitude,
     heading_tape: HeadingTape,
@@ -25,10 +28,12 @@ pub struct HUD<'a> {
 impl<'a> HUD<'a> {
     pub fn new(source: &'a dyn TelemetrySource<'a>, symbols: &'a SymbolTable) -> HUD<'a> {
         HUD {
+            speed: Speed::default(),
             aoa: AOA::new(&symbols),
             altitude: Altitude::default(),
             heading_tape: HeadingTape::new(&symbols),
             aligns: enum_map! {
+                Displayable::Speed => Some(Align::Left),
                 Displayable::AOA => Some(Align::Left),
                 Displayable::Altitude => Some(Align::Right),
                 Displayable::HeadingTape => Some(Align::Top),
@@ -39,6 +44,7 @@ impl<'a> HUD<'a> {
 
     fn to_drawable<'b, T: AsMut<[u8]>>(&'b self, displayable: Displayable) -> &'b dyn Drawable<T> {
         match displayable {
+            Displayable::Speed => &self.speed,
             Displayable::AOA => &self.aoa,
             Displayable::Altitude => &self.altitude,
             Displayable::HeadingTape => &self.heading_tape,
@@ -61,8 +67,10 @@ impl<'a> HUD<'a> {
             let align = align_option.unwrap();
             let drawable: &dyn Drawable<T> = self.to_drawable(display);
             let region = match align {
-                Align::Top => &mut output[indexes[align]..],
-                Align::Bottom => &mut output[..output_len - indexes[align]],
+                Align::Top | Align::TopLeft | Align::TopRight => &mut output[indexes[align]..],
+                Align::Bottom | Align::BottomLeft | Align::BottomRight => {
+                    &mut output[..output_len - indexes[align]]
+                }
                 Align::Left | Align::Right => &mut output[output_len / 2 + indexes[align]..],
                 _ => output,
             };
@@ -111,8 +119,8 @@ mod test {
                         ~                            $\
                         ~                            $\
                         ~                            $\
-                        ⍺ ₃0                      3000\
-                        ~                            $\
+                        ~ 100                     3000\
+                        ⍺ ₃0                         $\
                         ~                            $\
                         ~                            $\
                         ~                            $\
