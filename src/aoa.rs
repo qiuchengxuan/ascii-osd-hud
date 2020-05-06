@@ -1,8 +1,8 @@
 use numtoa::NumToA;
 
-use crate::data_source::Data;
 use crate::drawable::{Align, Drawable, Layer};
 use crate::symbol;
+use crate::telemetry::Telemetry;
 
 pub struct AOA {
     alpha: symbol::Index,
@@ -29,9 +29,9 @@ impl Drawable for AOA {
         Layer::Top
     }
 
-    fn draw<T: AsMut<[u8]>>(&self, data: &Data, output: &mut [T]) {
+    fn draw<T: AsMut<[u8]>>(&self, telemetry: &Telemetry, output: &mut [T]) {
         let mut num_buffer: [u8; 5] = [0; 5];
-        let num_str = data.aoa.numtoa(10, &mut num_buffer);
+        let num_str = telemetry.aoa.numtoa(10, &mut num_buffer);
         let buffer = output[output.len() / 2 + self.sequence].as_mut();
         buffer[0] = self.alpha;
         buffer[2..2 + num_str.len()].copy_from_slice(num_str);
@@ -45,9 +45,9 @@ impl Drawable for AOA {
 
 #[cfg(test)]
 mod test {
-    use crate::data_source::Data;
     use crate::drawable::Drawable;
     use crate::symbol::{Symbol, Symbols};
+    use crate::telemetry::Telemetry;
     use crate::test_utils::to_utf8_string;
 
     use super::AOA;
@@ -61,9 +61,9 @@ mod test {
             symbols.0[Symbol::ZeroWithTraillingDot],
             0,
         );
-        let mut data = Data::default();
-        data.aoa = 31;
-        aoa.draw(&data, &mut buffer);
+        let mut telemetry = Telemetry::default();
+        telemetry.aoa = 31;
+        aoa.draw(&telemetry, &mut buffer);
         assert_eq!("⍺ ₃1", to_utf8_string(&buffer[0]));
     }
 }

@@ -2,11 +2,11 @@
 
 mod altitude;
 mod aoa;
-mod data_source;
 mod drawable;
-mod heading;
+mod heading_tape;
 mod hud;
 mod symbol;
+mod telemetry;
 #[cfg(test)]
 mod test_utils;
 

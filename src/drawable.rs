@@ -1,4 +1,4 @@
-use crate::data_source::Data;
+use crate::telemetry::Telemetry;
 
 pub enum Layer {
     Top,
@@ -21,5 +21,5 @@ pub enum Align {
 pub trait Drawable {
     fn layer(&self) -> Layer;
     fn align(&self) -> Align;
-    fn draw<T: AsMut<[u8]>>(&self, data: &Data, output: &mut [T]);
+    fn draw<T: AsMut<[u8]>>(&self, telemetry: &Telemetry, output: &mut [T]);
 }

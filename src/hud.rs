@@ -2,7 +2,7 @@ use core::cell::Cell;
 
 use enum_map::Enum;
 
-use crate::data_source::DataSource;
+use crate::telemetry::TelemetrySource;
 
 #[derive(Enum)]
 pub enum DisplayType {
@@ -25,16 +25,16 @@ pub enum AspectRatio {
 }
 
 pub struct HUD<'a> {
-    data_source: &'a dyn DataSource<'a>,
+    telemetry_source: &'a dyn TelemetrySource<'a>,
     fps: u8,
     counter: Cell<u8>,
     fov: u8,
 }
 
 impl<'a> HUD<'a> {
-    pub fn new(source: &'a dyn DataSource<'a>, fps: u8) -> HUD<'a> {
+    pub fn new(source: &'a dyn TelemetrySource<'a>, fps: u8) -> HUD<'a> {
         HUD {
-            data_source: source,
+            telemetry_source: source,
             fps,
             counter: Cell::new(0),
             fov: 150,
@@ -47,8 +47,7 @@ impl<'a> HUD<'a> {
         }
     }
 
-    pub fn dump(&self, output: &[&mut [u8]]) {
-        // for entry in DisplayType::iter() {}
-        // self.counter.set(self.counter.get() + 1)
+    pub fn draw(&self, output: &[&mut [u8]]) {
+        let _telemetry = self.telemetry_source.get_telemetry();
     }
 }

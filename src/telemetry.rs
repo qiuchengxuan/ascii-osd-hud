@@ -16,7 +16,7 @@ pub struct Waypoint<'a> {
     pub name: &'a str, // e.g. "HOME" when number = 0
 }
 
-pub struct Data<'a> {
+pub struct Telemetry<'a> {
     pub attitude: Attitude,  // in degree
     pub altitude: u16,       // dimensionless
     pub speed: u16,          // dimensionless
@@ -28,9 +28,9 @@ pub struct Data<'a> {
     pub waypoint: Waypoint<'a>,
 }
 
-impl<'a> Default for Data<'a> {
-    fn default() -> Data<'a> {
-        Data {
+impl<'a> Default for Telemetry<'a> {
+    fn default() -> Telemetry<'a> {
+        Telemetry {
             altitude: 3000,
             heading: 0,
             attitude: Attitude {
@@ -56,6 +56,6 @@ impl<'a> Default for Data<'a> {
     }
 }
 
-pub trait DataSource<'a> {
-    fn get(&self) -> Data<'a>;
+pub trait TelemetrySource<'a> {
+    fn get_telemetry(&self) -> Telemetry<'a>;
 }
