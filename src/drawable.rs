@@ -1,11 +1,8 @@
+use enum_map::Enum;
+
 use crate::telemetry::Telemetry;
 
-pub enum Layer {
-    Top,
-    Bottom,
-}
-
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Enum)]
 pub enum Align {
     Top,
     TopLeft,
@@ -18,8 +15,7 @@ pub enum Align {
     BottomRight,
 }
 
-pub trait Drawable {
-    fn layer(&self) -> Layer;
+pub trait Drawable<T: AsMut<[u8]>> {
     fn align(&self) -> Align;
-    fn draw<T: AsMut<[u8]>>(&self, telemetry: &Telemetry, output: &mut [T]);
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]);
 }

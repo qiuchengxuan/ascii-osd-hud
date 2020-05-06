@@ -3,8 +3,8 @@ use core::cmp::min;
 
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable, Layer};
-use crate::symbol;
+use crate::drawable::{Align, Drawable};
+use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
 const HEADING_TAPE_WIDTH: usize = 3 * 5; // e.g. "350 . 000 . 010"
@@ -27,17 +27,15 @@ fn theta_to_offset(theta: u16) -> usize {
 
 pub struct HeadingTape {
     align: Align, // only accept Top or Bottom
-    sequence: usize,
-    waypoint_indicator: symbol::Index,
+    waypoint_indicator: SymbolIndex,
     counter: Cell<usize>,
 }
 
 impl HeadingTape {
-    fn new(waypoint_indicator: symbol::Index) -> HeadingTape {
+    pub fn new(symbols: &SymbolTable) -> HeadingTape {
         HeadingTape {
             align: Align::Top,
-            sequence: 0,
-            waypoint_indicator,
+            waypoint_indicator: symbols[Symbol::BoxDrawningLightUp],
             counter: Cell::new(0),
         }
     }
@@ -55,19 +53,15 @@ impl HeadingTape {
     }
 }
 
-impl Drawable for HeadingTape {
+impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
     fn align(&self) -> Align {
         self.align
     }
 
-    fn layer(&self) -> Layer {
-        Layer::Top
-    }
-
-    fn draw<T: AsMut<[u8]>>(&self, telemetry: &Telemetry, output: &mut [T]) {
-        let mut index = self.sequence;
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+        let mut index = 0;
         if self.align == Align::Bottom {
-            index = output.len() - 1 - self.sequence;
+            index = output.len() - 1;
         }
         draw_tape(telemetry.heading, output[index].as_mut());
 
@@ -119,7 +113,7 @@ fn draw_tape(heading: u16, output: &mut [u8]) {
 #[cfg(test)]
 mod test {
     use crate::drawable::Drawable;
-    use crate::symbol::{Symbol, Symbols};
+    use crate::symbol::default_symbol_table;
     use crate::telemetry::Telemetry;
     use crate::test_utils::to_utf8_string;
 
@@ -128,70 +122,70 @@ mod test {
     #[test]
     fn test_000_center_and_conflict_symbol() {
         let mut buffer: [[u8; HEADING_TAPE_WIDTH + 2]; 2] = [[0; HEADING_TAPE_WIDTH + 2]; 2];
-        let tape = HeadingTape::new(Symbols::default().0[Symbol::BoxDrawningLightUp]);
+        let tape = HeadingTape::new(&default_symbol_table());
         let telemetry = Telemetry::default();
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0]));
-        assert_eq!("        ^        ", to_utf8_string(&buffer[1]));
+        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
+        assert_eq!("        ^        ", to_utf8_string(&buffer[1..2]));
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!("        ╵        ", to_utf8_string(&buffer[1]));
+        assert_eq!("        ╵        ", to_utf8_string(&buffer[1..2]));
     }
 
     #[test]
     fn test_different_heading() {
         let mut buffer: [[u8; HEADING_TAPE_WIDTH + 2]; 2] = [[0; HEADING_TAPE_WIDTH + 2]; 2];
-        let tape = HeadingTape::new(Symbols::default().0[Symbol::BoxDrawningLightUp]);
+        let tape = HeadingTape::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
         telemetry.heading = 359;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!("  350 . 000 . 01 ", to_utf8_string(&buffer[0]));
+        assert_eq!("  350 . 000 . 01 ", to_utf8_string(&buffer[0..1]));
         telemetry.heading = 358;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" . 350 . 000 . 0 ", to_utf8_string(&buffer[0]));
+        assert_eq!(" . 350 . 000 . 0 ", to_utf8_string(&buffer[0..1]));
         telemetry.heading = 356;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!("  . 350 . 000 .  ", to_utf8_string(&buffer[0]));
+        assert_eq!("  . 350 . 000 .  ", to_utf8_string(&buffer[0..1]));
     }
 
     #[test]
     fn test_yaw() {
         let mut buffer: [[u8; HEADING_TAPE_WIDTH + 2]; 2] = [[0; HEADING_TAPE_WIDTH + 2]; 2];
-        let tape = HeadingTape::new(Symbols::default().0[Symbol::BoxDrawningLightUp]);
+        let tape = HeadingTape::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
         telemetry.attitude.yaw = 358;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0]));
-        assert_eq!("       ^╵        ", to_utf8_string(&buffer[1]));
+        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
+        assert_eq!("       ^╵        ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].iter_mut().for_each(|x| *x = 0);
         telemetry.attitude.yaw = 300;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" ^      ╵        ", to_utf8_string(&buffer[1]));
+        assert_eq!(" ^      ╵        ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].iter_mut().for_each(|x| *x = 0);
         telemetry.attitude.yaw = 90;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!("        ╵      ^ ", to_utf8_string(&buffer[1]));
+        assert_eq!("        ╵      ^ ", to_utf8_string(&buffer[1..2]));
     }
 
     #[test]
     fn test_waypoint() {
-        let mut buffer: [[u8; HEADING_TAPE_WIDTH + 2]; 2] = [[0; HEADING_TAPE_WIDTH + 2]; 2];
-        let tape = HeadingTape::new(Symbols::default().0[Symbol::BoxDrawningLightUp]);
+        let mut buffer = [[0u8; HEADING_TAPE_WIDTH + 2]; 2];
+        let tape = HeadingTape::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
         telemetry.waypoint.coordinate.theta = 90;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0]));
-        assert_eq!("        ^      ╵ ", to_utf8_string(&buffer[1]));
+        assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
+        assert_eq!("        ^      ╵ ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].iter_mut().for_each(|x| *x = 0);
         telemetry.waypoint.coordinate.theta = 180;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1]));
+        assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].iter_mut().for_each(|x| *x = 0);
         telemetry.waypoint.coordinate.theta = 270;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1]));
+        assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));
     }
 }

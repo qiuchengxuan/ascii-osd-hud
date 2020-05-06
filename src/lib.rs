@@ -4,8 +4,8 @@ mod altitude;
 mod aoa;
 mod drawable;
 mod heading_tape;
-mod hud;
-mod symbol;
+pub mod hud;
+pub mod symbol;
 mod telemetry;
 #[cfg(test)]
 mod test_utils;

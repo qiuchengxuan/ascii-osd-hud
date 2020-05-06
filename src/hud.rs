@@ -1,53 +1,125 @@
-use core::cell::Cell;
+use enum_map::{enum_map, Enum, EnumMap};
 
-use enum_map::Enum;
-
+use crate::altitude::Altitude;
+use crate::aoa::AOA;
+use crate::drawable::{Align, Drawable};
+use crate::heading_tape::HeadingTape;
+use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
 
 #[derive(Enum)]
-pub enum DisplayType {
-    Speed,
+pub enum Displayable {
+    AOA,
     Altitude,
     HeadingTape,
-    GForce,
-    AOA,
-    Battery,
-    FlightMode,
-    Waypoint,
-    FlightPathLadder,
-    VelocityVector,
-    WaypointVector,
-}
-
-pub enum AspectRatio {
-    Standard,
-    Wide,
 }
 
 pub struct HUD<'a> {
+    aoa: AOA,
+    altitude: Altitude,
+    heading_tape: HeadingTape,
+    aligns: EnumMap<Displayable, Option<Align>>,
     telemetry_source: &'a dyn TelemetrySource<'a>,
-    fps: u8,
-    counter: Cell<u8>,
-    fov: u8,
 }
 
 impl<'a> HUD<'a> {
-    pub fn new(source: &'a dyn TelemetrySource<'a>, fps: u8) -> HUD<'a> {
+    pub fn new(source: &'a dyn TelemetrySource<'a>, symbols: &'a SymbolTable) -> HUD<'a> {
         HUD {
+            aoa: AOA::new(&symbols),
+            altitude: Altitude::default(),
+            heading_tape: HeadingTape::new(&symbols),
+            aligns: enum_map! {
+                Displayable::AOA => Some(Align::Left),
+                Displayable::Altitude => Some(Align::Right),
+                Displayable::HeadingTape => Some(Align::Top),
+            },
             telemetry_source: source,
-            fps,
-            counter: Cell::new(0),
-            fov: 150,
         }
     }
 
-    pub fn set_fov(&mut self, fov: u8) {
-        if fov > 0 {
-            self.fov = fov;
+    fn to_drawable<'b, T: AsMut<[u8]>>(&'b self, displayable: Displayable) -> &'b dyn Drawable<T> {
+        match displayable {
+            Displayable::AOA => &self.aoa,
+            Displayable::Altitude => &self.altitude,
+            Displayable::HeadingTape => &self.heading_tape,
         }
     }
 
-    pub fn draw(&self, output: &[&mut [u8]]) {
-        let _telemetry = self.telemetry_source.get_telemetry();
+    pub fn draw<T: AsMut<[u8]>>(&self, output: &mut [T]) {
+        output.iter_mut().for_each(|line| {
+            for x in line.as_mut() {
+                *x = 0
+            }
+        });
+        let output_len = output.len();
+        let mut indexes: EnumMap<Align, usize> = EnumMap::new();
+        let telemetry = self.telemetry_source.get_telemetry();
+        for (display, align_option) in self.aligns.iter() {
+            if align_option.is_none() {
+                continue;
+            }
+            let align = align_option.unwrap();
+            let drawable: &dyn Drawable<T> = self.to_drawable(display);
+            let region = match align {
+                Align::Top => &mut output[indexes[align]..],
+                Align::Bottom => &mut output[..output_len - indexes[align]],
+                Align::Left | Align::Right => &mut output[output_len / 2 + indexes[align]..],
+                _ => output,
+            };
+            drawable.draw(&telemetry, region);
+            indexes[align] += 1;
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::symbol::default_symbol_table;
+    use crate::telemetry::{Telemetry, TelemetrySource};
+    use crate::test_utils::to_utf8_string;
+
+    use super::HUD;
+
+    struct StubTelemetrySource;
+
+    impl<'a> TelemetrySource<'a> for StubTelemetrySource {
+        fn get_telemetry(&self) -> Telemetry<'a> {
+            Telemetry::default()
+        }
+    }
+
+    #[test]
+    fn test_hud() {
+        let mut buffer = [[0u8; 30]; 16];
+        let symbols = default_symbol_table();
+        let hud = HUD::new(&StubTelemetrySource {}, &symbols);
+        hud.draw(&mut buffer);
+        buffer.iter_mut().for_each(|mutable| {
+            let line = mutable.as_mut();
+            if *line.last().unwrap() == 0u8 {
+                line[line.len() - 1] = '$' as u8;
+            }
+            if *line.first().unwrap() == 0u8 {
+                line[0] = '~' as u8;
+            }
+        });
+        let expected = "~       350 . 000 . 010      $\
+                        ~              ^             $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ⍺ ₃0                      3000\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ~                            $\
+                        ";
+        assert_eq!(expected, to_utf8_string(&buffer));
     }
 }

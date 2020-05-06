@@ -5,12 +5,14 @@ use ascii::ToAsciiChar;
 
 const UTF8_SYMBOLS: &str = " ⏉β°w⌖⍺☐▔⎺⎻⎯⎼⎽▁╵₀₁₂₃₄₅₆₇₈₉▏▕";
 
-pub fn to_utf8_string(bytes: &[u8]) -> String {
+pub fn to_utf8_string<T: AsRef<[u8]>>(lines: &[T]) -> String {
     let mut output = String::new();
     let symbols: Vec<char> = UTF8_SYMBOLS.chars().collect();
-    for &byte in bytes.iter() {
-        let ch = byte.to_ascii_char().unwrap().as_char();
-        output.push(*symbols.get(byte as usize).unwrap_or(&ch))
+    for line in lines.iter().map(|l| l.as_ref()) {
+        for &byte in line.iter() {
+            let ch = byte.to_ascii_char().unwrap().as_char();
+            output.push(*symbols.get(byte as usize).unwrap_or(&ch))
+        }
     }
     output
 }
