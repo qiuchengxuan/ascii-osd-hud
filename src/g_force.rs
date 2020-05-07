@@ -4,29 +4,27 @@ use crate::drawable::{Align, Drawable};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
-pub struct AOA {
-    alpha: SymbolIndex,
+pub struct GForce {
     zero_dot: SymbolIndex,
 }
 
-impl AOA {
+impl GForce {
     pub fn new(symbols: &SymbolTable) -> Self {
         Self {
-            alpha: symbols[Symbol::Alpha],
             zero_dot: symbols[Symbol::ZeroWithTraillingDot],
         }
     }
 }
 
-impl<T: AsMut<[u8]>> Drawable<T> for AOA {
+impl<T: AsMut<[u8]>> Drawable<T> for GForce {
     fn align(&self) -> Align {
         Align::Left
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
         let buffer = output[0].as_mut();
-        telemetry.aoa.numtoa(10, &mut buffer[2..5]);
-        buffer[0] = self.alpha;
+        telemetry.g_force.numtoa(10, &mut buffer[2..5]);
+        buffer[0] = 'g' as u8;
         if '0' as u8 <= buffer[3] && buffer[3] <= '9' as u8 {
             if self.zero_dot > '0' as u8 {
                 buffer[3] += self.zero_dot - '0' as u8;
@@ -46,20 +44,20 @@ mod test {
     use crate::telemetry::Telemetry;
     use crate::test_utils::to_utf8_string;
 
-    use super::AOA;
+    use super::GForce;
 
     #[test]
-    fn test_aoa() {
+    fn test_g_force() {
         let mut buffer = [[0u8; 6]];
-        let aoa = AOA::new(&default_symbol_table());
+        let g_force = GForce::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
-        telemetry.aoa = 31;
-        aoa.draw(&telemetry, &mut buffer);
-        assert_eq!("⍺  ₃1 ", to_utf8_string(&buffer));
+        telemetry.g_force = 11;
+        g_force.draw(&telemetry, &mut buffer);
+        assert_eq!("g  ₁1 ", to_utf8_string(&buffer));
 
         buffer[0].iter_mut().for_each(|x| *x = 0);
-        telemetry.aoa = 1;
-        aoa.draw(&telemetry, &mut buffer);
-        assert_eq!("⍺  ₀1 ", to_utf8_string(&buffer));
+        telemetry.g_force = 9;
+        g_force.draw(&telemetry, &mut buffer);
+        assert_eq!("g  ₀9 ", to_utf8_string(&buffer));
     }
 }

@@ -6,8 +6,8 @@ use crate::telemetry::Telemetry;
 pub struct Speed(Align); // only accept TopLeft or Left
 
 impl Default for Speed {
-    fn default() -> Speed {
-        Speed(Align::Left)
+    fn default() -> Self {
+        Self(Align::Left)
     }
 }
 
@@ -32,7 +32,8 @@ mod test {
     fn test_altitude() {
         let mut buffer = [[0u8; 6]];
         let altitude = Speed::default();
-        let telemetry = Telemetry::default();
+        let mut telemetry = Telemetry::default();
+        telemetry.speed = 100;
         altitude.draw(&telemetry, &mut buffer);
         assert_eq!("  100 ", to_utf8_string(&buffer));
     }

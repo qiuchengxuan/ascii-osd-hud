@@ -2,41 +2,84 @@ use enum_map::{enum_map, Enum, EnumMap};
 
 use crate::altitude::Altitude;
 use crate::aoa::AOA;
+use crate::battery::Battery;
 use crate::drawable::{Align, Drawable};
+use crate::flight_mode::FlightMode;
+use crate::g_force::GForce;
 use crate::heading_tape::HeadingTape;
+use crate::height::Height;
+use crate::rssi::RSSI;
 use crate::speed::Speed;
 use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
+use crate::vertial_speed::VerticalSpeed;
 
 #[derive(Enum)]
 pub enum Displayable {
+    // TopLeft
+    RSSI,
+
+    // Top
+    HeadingTape,
+
+    // TopRight,
+    Battery,
+
+    // Left
     Speed,
     AOA,
+    GForce,
+
+    // Right
     Altitude,
-    HeadingTape,
+    VerticalSpeed,
+
+    // BottomLeft
+    FlightMode,
+
+    // BottomRight
+    Height,
 }
 
 pub struct HUD<'a> {
-    speed: Speed,
-    aoa: AOA,
     altitude: Altitude,
+    aoa: AOA,
+    battery: Battery,
+    flight_mode: FlightMode,
+    g_force: GForce,
     heading_tape: HeadingTape,
+    height: Height,
+    rssi: RSSI,
+    speed: Speed,
+    vertial_speed: VerticalSpeed,
     aligns: EnumMap<Displayable, Option<Align>>,
-    telemetry_source: &'a dyn TelemetrySource<'a>,
+    telemetry_source: &'a dyn TelemetrySource,
 }
 
 impl<'a> HUD<'a> {
-    pub fn new(source: &'a dyn TelemetrySource<'a>, symbols: &'a SymbolTable) -> HUD<'a> {
+    pub fn new(source: &'a dyn TelemetrySource, symbols: &'a SymbolTable) -> HUD<'a> {
         HUD {
-            speed: Speed::default(),
-            aoa: AOA::new(&symbols),
             altitude: Altitude::default(),
+            aoa: AOA::new(&symbols),
+            battery: Battery::new(&symbols),
+            flight_mode: FlightMode::default(),
+            g_force: GForce::new(&symbols),
             heading_tape: HeadingTape::new(&symbols),
+            height: Height::default(),
+            rssi: RSSI::new(&symbols),
+            speed: Speed::default(),
+            vertial_speed: VerticalSpeed::default(),
             aligns: enum_map! {
-                Displayable::Speed => Some(Align::Left),
-                Displayable::AOA => Some(Align::Left),
                 Displayable::Altitude => Some(Align::Right),
+                Displayable::AOA => Some(Align::Left),
+                Displayable::Battery => Some(Align::TopRight),
+                Displayable::FlightMode => Some(Align::BottomLeft),
+                Displayable::GForce => Some(Align::Left),
                 Displayable::HeadingTape => Some(Align::Top),
+                Displayable::Height => Some(Align::BottomRight),
+                Displayable::RSSI => Some(Align::TopLeft),
+                Displayable::Speed => Some(Align::Left),
+                Displayable::VerticalSpeed => Some(Align::Right),
             },
             telemetry_source: source,
         }
@@ -44,10 +87,16 @@ impl<'a> HUD<'a> {
 
     fn to_drawable<'b, T: AsMut<[u8]>>(&'b self, displayable: Displayable) -> &'b dyn Drawable<T> {
         match displayable {
-            Displayable::Speed => &self.speed,
-            Displayable::AOA => &self.aoa,
             Displayable::Altitude => &self.altitude,
+            Displayable::AOA => &self.aoa,
+            Displayable::Battery => &self.battery,
+            Displayable::FlightMode => &self.flight_mode,
+            Displayable::GForce => &self.g_force,
             Displayable::HeadingTape => &self.heading_tape,
+            Displayable::Height => &self.height,
+            Displayable::RSSI => &self.rssi,
+            Displayable::Speed => &self.speed,
+            Displayable::VerticalSpeed => &self.vertial_speed,
         }
     }
 
@@ -83,16 +132,30 @@ impl<'a> HUD<'a> {
 #[cfg(test)]
 mod test {
     use crate::symbol::default_symbol_table;
-    use crate::telemetry::{Telemetry, TelemetrySource};
+    use crate::telemetry::{Attitude, Telemetry, TelemetrySource};
     use crate::test_utils::to_utf8_string;
 
     use super::HUD;
 
     struct StubTelemetrySource;
 
-    impl<'a> TelemetrySource<'a> for StubTelemetrySource {
-        fn get_telemetry(&self) -> Telemetry<'a> {
-            Telemetry::default()
+    impl TelemetrySource for StubTelemetrySource {
+        fn get_telemetry(&self) -> Telemetry {
+            Telemetry {
+                altitude: 3000,
+                attitude: Attitude {
+                    yaw: 357,
+                    ..Default::default()
+                },
+                aoa: 31,
+                g_force: 11,
+                heading: 90,
+                height: 999,
+                rssi: 100,
+                speed: 100,
+                vertical_speed: 100,
+                ..Default::default()
+            }
         }
     }
 
@@ -105,29 +168,28 @@ mod test {
         buffer.iter_mut().for_each(|mutable| {
             let line = mutable.as_mut();
             if *line.last().unwrap() == 0u8 {
-                line[line.len() - 1] = '$' as u8;
+                line[line.len() - 1] = '.' as u8;
             }
             if *line.first().unwrap() == 0u8 {
-                line[0] = '~' as u8;
+                line[0] = '.' as u8;
             }
         });
-        let expected = "~       350 . 000 . 010      $\
-                        ~              ^             $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~ 100                     3000\
-                        ⍺ ₃0                         $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ~                            $\
-                        ";
+        let expected = "⏉100    080 . 090 . 100   β100\
+                        .             ^╵             .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        . 100                     3000\
+                        ⍺  ₃1                      100\
+                        g  ₁1                        .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        .                            .\
+                        MAN                       999R";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 }

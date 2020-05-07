@@ -32,8 +32,8 @@ pub struct HeadingTape {
 }
 
 impl HeadingTape {
-    pub fn new(symbols: &SymbolTable) -> HeadingTape {
-        HeadingTape {
+    pub fn new(symbols: &SymbolTable) -> Self {
+        Self {
             align: Align::Top,
             waypoint_indicator: symbols[Symbol::BoxDrawningLightUp],
             counter: Cell::new(0),

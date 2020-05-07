@@ -2,14 +2,20 @@
 
 mod altitude;
 mod aoa;
+mod battery;
 mod drawable;
+mod flight_mode;
+mod g_force;
 mod heading_tape;
+mod height;
 pub mod hud;
+mod rssi;
 mod speed;
 pub mod symbol;
 mod telemetry;
 #[cfg(test)]
 mod test_utils;
+mod vertial_speed;
 
 #[cfg(test)]
 #[macro_use]
