@@ -12,11 +12,18 @@ use crate::rssi::RSSI;
 use crate::speed::Speed;
 use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
+use crate::velocity_vector::VelocityVector;
 use crate::vertial_speed::VerticalSpeed;
 use crate::waypoint::Waypoint;
+use crate::waypoint_vector::WaypointVector;
+use crate::AspectRatio;
 
 #[derive(Enum)]
 pub enum Displayable {
+    // Bottom
+    VelocityVector,
+    WaypointVector,
+
     // TopLeft
     RSSI,
 
@@ -52,13 +59,20 @@ pub struct HUD<'a> {
     rssi: RSSI,
     speed: Speed,
     vertial_speed: VerticalSpeed,
+    velocity_vector: VelocityVector,
     waypoint: Waypoint,
+    waypoint_vector: WaypointVector,
     aligns: EnumMap<Displayable, Option<Align>>,
     telemetry_source: &'a dyn TelemetrySource,
 }
 
 impl<'a> HUD<'a> {
-    pub fn new(source: &'a dyn TelemetrySource, symbols: &'a SymbolTable) -> HUD<'a> {
+    pub fn new(
+        source: &'a dyn TelemetrySource,
+        symbols: &'a SymbolTable,
+        fov: u8,
+        aspect_ratio: AspectRatio,
+    ) -> HUD<'a> {
         HUD {
             altitude: Altitude::default(),
             aoa: AOA::new(&symbols),
@@ -70,6 +84,8 @@ impl<'a> HUD<'a> {
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
             vertial_speed: VerticalSpeed::default(),
+            velocity_vector: VelocityVector::new(&symbols, fov, aspect_ratio),
+            waypoint_vector: WaypointVector::new(&symbols, fov, aspect_ratio),
             waypoint: Waypoint::new(&symbols),
             aligns: enum_map! {
                 Displayable::Altitude => Some(Align::Right),
@@ -82,7 +98,9 @@ impl<'a> HUD<'a> {
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
                 Displayable::VerticalSpeed => Some(Align::Right),
+                Displayable::VelocityVector => Some(Align::Center),
                 Displayable::Waypoint => Some(Align::BottomRight),
+                Displayable::WaypointVector => Some(Align::Center),
             },
             telemetry_source: source,
         }
@@ -100,7 +118,9 @@ impl<'a> HUD<'a> {
             Displayable::RSSI => &self.rssi,
             Displayable::Speed => &self.speed,
             Displayable::VerticalSpeed => &self.vertial_speed,
+            Displayable::VelocityVector => &self.velocity_vector,
             Displayable::Waypoint => &self.waypoint,
+            Displayable::WaypointVector => &self.waypoint_vector,
         }
     }
 
@@ -136,7 +156,8 @@ impl<'a> HUD<'a> {
 mod test {
     use crate::symbol::default_symbol_table;
     use crate::telemetry::{Attitude, SphericalCoordinate, Telemetry, TelemetrySource, Waypoint};
-    use crate::test_utils::to_utf8_string;
+    use crate::test_utils::{fill_edge, to_utf8_string};
+    use crate::AspectRatio;
 
     use super::HUD;
 
@@ -152,15 +173,19 @@ mod test {
                 },
                 aoa: 31,
                 g_force: 11,
-                heading: 90,
                 height: 999,
                 rssi: 100,
-                speed: 100,
                 vertical_speed: 100,
+                velocity_vector: SphericalCoordinate {
+                    rho: 100,  // speed
+                    theta: 10, // heading
+                    phi: -5,
+                },
                 waypoint: Waypoint {
                     coordinate: SphericalCoordinate {
-                        phi: 47,
-                        ..Default::default()
+                        rho: 47,
+                        theta: 350,
+                        phi: -10,
                     },
                     ..Default::default()
                 },
@@ -173,19 +198,11 @@ mod test {
     fn test_hud() {
         let mut buffer = [[0u8; 30]; 16];
         let symbols = default_symbol_table();
-        let hud = HUD::new(&StubTelemetrySource {}, &symbols);
+        let hud = HUD::new(&StubTelemetrySource {}, &symbols, 150, AspectRatio::Wide);
         hud.draw(&mut buffer);
-        buffer.iter_mut().for_each(|mutable| {
-            let line = mutable.as_mut();
-            if *line.last().unwrap() == 0u8 {
-                line[line.len() - 1] = '.' as u8;
-            }
-            if *line.first().unwrap() == 0u8 {
-                line[0] = '.' as u8;
-            }
-        });
-        let expected = "⏉100    080 . 090 . 100   β100\
-                        .             ^╵             .\
+        fill_edge(&mut buffer);
+        let expected = "⏉100    000 . 010 . 020   β100\
+                        .        ╵    ^              .\
                         .                            .\
                         .                            .\
                         .                            .\
@@ -193,8 +210,8 @@ mod test {
                         .                            .\
                         .                            .\
                         . 100                     3000\
-                        ⍺  ₃1                      100\
-                        g  ₁1                        .\
+                        ⍺  ₃1            ⌖         100\
+                        g  ₁1        ☐               .\
                         .                            .\
                         .                         999R\
                         .                       0/HOME\

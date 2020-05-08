@@ -17,7 +17,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Speed {
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        telemetry.speed.numtoa(10, &mut output[0].as_mut()[..5]);
+        telemetry.speed().numtoa(10, &mut output[0].as_mut()[..5]);
         1
     }
 }
@@ -34,7 +34,7 @@ mod test {
         let mut buffer = [[0u8; 6]];
         let altitude = Speed::default();
         let mut telemetry = Telemetry::default();
-        telemetry.speed = 100;
+        telemetry.velocity_vector.rho = 100;
         altitude.draw(&telemetry, &mut buffer);
         assert_eq!("  100 ", to_utf8_string(&buffer));
     }

@@ -39,12 +39,12 @@ impl<T: AsMut<[u8]>> Drawable<T> for Waypoint {
 
         // distance
         let buffer = output[last_index - 1].as_mut();
-        if waypoint.coordinate.phi < 100 {
-            let phi = waypoint.coordinate.phi;
-            phi.numtoa(10, &mut buffer[..buffer_len - 2]);
+        if waypoint.coordinate.rho < 100 {
+            let rho = waypoint.coordinate.rho;
+            rho.numtoa(10, &mut buffer[..buffer_len - 2]);
             buffer[buffer_len - 4] = to_number_with_dot(buffer[buffer_len - 4], self.zero_dot);
         } else {
-            (waypoint.coordinate.phi / 10).numtoa(10, &mut buffer[..buffer_len - 2]);
+            (waypoint.coordinate.rho / 10).numtoa(10, &mut buffer[..buffer_len - 2]);
         }
         buffer[buffer_len - 2..].copy_from_slice(&waypoint.unit[..]);
 
@@ -75,18 +75,28 @@ mod test {
         assert_eq!("    0/HOME      ₀0NM  00:00:00", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.waypoint.coordinate.phi = 100;
+        telemetry.waypoint.coordinate.rho = 600;
         waypoint.draw(&telemetry, &mut buffer);
-        assert_eq!("    0/HOME      10NM  00:00:00", to_utf8_string(&buffer));
+        assert_eq!("    0/HOME      60NM  00:00:00", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.speed = 60;
+        telemetry.velocity_vector.rho = 60;
         waypoint.draw(&telemetry, &mut buffer);
-        assert_eq!("    0/HOME      10NM  00:10:00", to_utf8_string(&buffer));
+        assert_eq!("    0/HOME      60NM  01:00:00", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.waypoint.coordinate.phi = 99;
+        telemetry.velocity_vector.rho = 61;
         waypoint.draw(&telemetry, &mut buffer);
-        assert_eq!("    0/HOME      ₉9NM  00:09:54", to_utf8_string(&buffer));
+        assert_eq!("    0/HOME      60NM  00:59:00", to_utf8_string(&buffer));
+
+        buffer.iter_mut().for_each(|b| b.zero());
+        telemetry.waypoint.coordinate.rho = 99;
+        waypoint.draw(&telemetry, &mut buffer);
+        assert_eq!("    0/HOME      ₉9NM  00:09:44", to_utf8_string(&buffer));
+
+        buffer.iter_mut().for_each(|b| b.zero());
+        telemetry.waypoint.coordinate.rho = 98;
+        waypoint.draw(&telemetry, &mut buffer);
+        assert_eq!("    0/HOME      ₉8NM  00:09:38", to_utf8_string(&buffer));
     }
 }
