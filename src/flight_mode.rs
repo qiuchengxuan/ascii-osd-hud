@@ -15,7 +15,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for FlightMode {
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        let buffer = output.last_mut().unwrap().as_mut();
+        let buffer = output[0].as_mut();
         buffer[..4].copy_from_slice(&telemetry.flight_mode[..]);
         1
     }

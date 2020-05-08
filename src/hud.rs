@@ -173,7 +173,7 @@ mod test {
                 },
                 aoa: 31,
                 g_force: 11,
-                height: 999,
+                height: 99,
                 rssi: 100,
                 vertical_speed: 100,
                 velocity_vector: SphericalCoordinate {
@@ -212,11 +212,11 @@ mod test {
                         . 100                     3000\
                         ⍺  ₃1            ⌖         100\
                         g  ₁1        ☐               .\
-                        .                            .\
-                        .                         999R\
+                        MAN                          .\
+                        .                          99R\
                         .                       0/HOME\
                         .                         ₄7NM\
-                        MAN                   00:02:49";
+                        .                     00:02:49";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 }
