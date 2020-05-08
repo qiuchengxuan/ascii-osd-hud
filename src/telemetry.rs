@@ -15,7 +15,7 @@ impl Default for Attitude {
 }
 
 pub struct SphericalCoordinate {
-    pub rho: u16,   // ρ or radius, dimensionless
+    pub rho: u16,   // ρ or radius, km * 10 or nm * 10
     pub theta: u16, // θ, 0 <= θ < 360, azimuthal angle
     pub phi: u16,   // φ, 0 <= φ < 180, polar angle
 }
@@ -31,33 +31,35 @@ impl Default for SphericalCoordinate {
 }
 
 pub struct Waypoint {
-    pub coordinate: SphericalCoordinate,
     pub number: u8,    // e.g. 0 means home or base
     pub name: [u8; 4], // e.g. "HOME" when number = 0
+    pub coordinate: SphericalCoordinate,
+    pub unit: [u8; 2], // KM or NM
 }
 
 impl Default for Waypoint {
     fn default() -> Self {
         Self {
-            coordinate: SphericalCoordinate::default(),
             number: 0,
             name: *b"HOME",
+            coordinate: SphericalCoordinate::default(),
+            unit: *b"NM",
         }
     }
 }
 
 pub struct Telemetry {
-    pub altitude: u16,        // dimensionless
-    pub aoa: u8,              // in degree*10
-    pub attitude: Attitude,   // in degree
-    pub battery: u8,          // percentage
-    pub flight_mode: [u8; 4], // or AP mode
-    pub g_force: u8,          // in g*10
-    pub heading: u16,         // in degree
-    pub height: u16,          // dimensionless
-    pub rssi: u8,             // percentage
-    pub speed: u16,           // dimensionless
-    pub vertical_speed: i16,  // dimensionless
+    pub altitude: u16,      // feets or meters
+    pub aoa: u8,            // in degree*10
+    pub attitude: Attitude, // in degree
+    pub battery: u8,        // percentage
+    pub flight_mode: [u8; 4],
+    pub g_force: u8,         // in g*10
+    pub heading: u16,        // in degree
+    pub height: u16,         // feets or meters, same with altitude
+    pub rssi: u8,            // percentage
+    pub speed: u16,          // km/h or knots * 10
+    pub vertical_speed: i16, // feets/min or m/s
     pub waypoint: Waypoint,
 }
 
@@ -77,6 +79,21 @@ impl<'a> Default for Telemetry {
             vertical_speed: 0,
             waypoint: Waypoint::default(),
         }
+    }
+}
+
+impl Telemetry {
+    pub fn speed(&self) -> u16 {
+        self.speed / 10
+    }
+
+    pub fn time_to_go(&self) -> u32 {
+        let phi = self.waypoint.coordinate.phi;
+        let speed = self.speed;
+        if phi > 0 && speed > 0 {
+            return phi as u32 * 3600 / 10 / speed as u32; // phi / 10 / (speed / 3600)
+        }
+        0
     }
 }
 

@@ -1,6 +1,6 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::telemetry::Telemetry;
 
 pub struct Altitude(Align); // only accept TopRight or Right
@@ -16,8 +16,9 @@ impl<T: AsMut<[u8]>> Drawable<T> for Altitude {
         self.0
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         telemetry.altitude.numtoa(10, output[0].as_mut());
+        1
     }
 }
 

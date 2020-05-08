@@ -1,6 +1,6 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
@@ -21,12 +21,13 @@ impl<T: AsMut<[u8]>> Drawable<T> for RSSI {
         Align::TopLeft
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let mut num_buffer: [u8; 5] = [0; 5];
         let num_str = telemetry.rssi.numtoa(10, &mut num_buffer);
         let buffer = output[0].as_mut();
         buffer[0] = self.antenna;
         buffer[1..1 + num_str.len()].copy_from_slice(num_str);
+        1
     }
 }
 

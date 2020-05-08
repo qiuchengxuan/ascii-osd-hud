@@ -16,3 +16,15 @@ pub fn to_utf8_string<T: AsRef<[u8]>>(lines: &[T]) -> String {
     }
     output
 }
+
+pub trait ZeroSlice<T> {
+    fn zero(&mut self);
+}
+
+impl ZeroSlice<u8> for [u8] {
+    fn zero(&mut self) {
+        for x in self {
+            *x = 0
+        }
+    }
+}

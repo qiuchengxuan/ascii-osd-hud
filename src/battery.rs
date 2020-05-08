@@ -1,6 +1,6 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
@@ -21,13 +21,14 @@ impl<T: AsMut<[u8]>> Drawable<T> for Battery {
         Align::TopRight
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let mut num_buffer: [u8; 5] = [0; 5];
         let number = telemetry.battery.numtoa(10, &mut num_buffer);
         let buffer = output[0].as_mut();
         let buffer_len = buffer.len();
         buffer[buffer_len - number.len() - 1] = self.battery;
         buffer[buffer_len - number.len()..].copy_from_slice(number);
+        1
     }
 }
 

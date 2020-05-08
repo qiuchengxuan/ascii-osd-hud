@@ -1,6 +1,6 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::telemetry::Telemetry;
 
 pub struct Speed(Align); // only accept TopLeft or Left
@@ -16,8 +16,9 @@ impl<T: AsMut<[u8]>> Drawable<T> for Speed {
         self.0
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         telemetry.speed.numtoa(10, &mut output[0].as_mut()[..5]);
+        1
     }
 }
 

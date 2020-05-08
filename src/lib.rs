@@ -16,6 +16,7 @@ mod telemetry;
 #[cfg(test)]
 mod test_utils;
 mod vertial_speed;
+mod waypoint;
 
 #[cfg(test)]
 #[macro_use]

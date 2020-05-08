@@ -15,7 +15,9 @@ pub enum Align {
     BottomRight,
 }
 
+pub type NumOfLine = usize;
+
 pub trait Drawable<T: AsMut<[u8]>> {
     fn align(&self) -> Align;
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]);
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine;
 }

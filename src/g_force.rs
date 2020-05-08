@@ -1,7 +1,7 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
-use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
+use crate::drawable::{Align, Drawable, NumOfLine};
+use crate::symbol::{to_number_with_dot, Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
 pub struct GForce {
@@ -21,19 +21,12 @@ impl<T: AsMut<[u8]>> Drawable<T> for GForce {
         Align::Left
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
         telemetry.g_force.numtoa(10, &mut buffer[2..5]);
         buffer[0] = 'g' as u8;
-        if '0' as u8 <= buffer[3] && buffer[3] <= '9' as u8 {
-            if self.zero_dot > '0' as u8 {
-                buffer[3] += self.zero_dot - '0' as u8;
-            } else {
-                buffer[3] -= '0' as u8 - self.zero_dot;
-            }
-        } else if buffer[3] == 0 {
-            buffer[3] = self.zero_dot;
-        }
+        buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
+        1
     }
 }
 
@@ -42,7 +35,7 @@ mod test {
     use crate::drawable::Drawable;
     use crate::symbol::default_symbol_table;
     use crate::telemetry::Telemetry;
-    use crate::test_utils::to_utf8_string;
+    use crate::test_utils::{to_utf8_string, ZeroSlice};
 
     use super::GForce;
 
@@ -55,7 +48,7 @@ mod test {
         g_force.draw(&telemetry, &mut buffer);
         assert_eq!("g  ₁1 ", to_utf8_string(&buffer));
 
-        buffer[0].iter_mut().for_each(|x| *x = 0);
+        buffer[0].zero();
         telemetry.g_force = 9;
         g_force.draw(&telemetry, &mut buffer);
         assert_eq!("g  ₀9 ", to_utf8_string(&buffer));

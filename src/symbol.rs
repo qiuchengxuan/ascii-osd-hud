@@ -25,6 +25,20 @@ pub enum Symbol {
     RightOneEighthBlock,
 }
 
+pub fn to_number_with_dot(byte: u8, zero_with_trailling_dot: SymbolIndex) -> u8 {
+    if '0' as u8 <= byte && byte <= '9' as u8 {
+        if zero_with_trailling_dot > '0' as u8 {
+            byte + (zero_with_trailling_dot - '0' as u8)
+        } else {
+            byte - ('0' as u8 - zero_with_trailling_dot)
+        }
+    } else if byte == 0 {
+        zero_with_trailling_dot
+    } else {
+        byte
+    }
+}
+
 pub type SymbolTable = EnumMap<Symbol, SymbolIndex>;
 
 pub fn default_symbol_table() -> SymbolTable {

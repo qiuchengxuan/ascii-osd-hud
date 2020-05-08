@@ -1,6 +1,6 @@
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::telemetry::Telemetry;
 
 pub struct Height(Align); // Right only
@@ -16,9 +16,9 @@ impl<T: AsMut<[u8]>> Drawable<T> for Height {
         self.0
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         if telemetry.height >= 1000 {
-            return;
+            return 0;
         }
         let mut buffer = output[0].as_mut();
         if self.0 == Align::BottomRight {
@@ -28,6 +28,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Height {
         let region = &mut buffer[..buffer_len - 1];
         telemetry.height.numtoa(10, region);
         buffer[buffer_len - 1] = 'R' as u8;
+        1
     }
 }
 

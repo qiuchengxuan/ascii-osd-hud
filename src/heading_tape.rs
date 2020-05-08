@@ -3,7 +3,7 @@ use core::cmp::min;
 
 use numtoa::NumToA;
 
-use crate::drawable::{Align, Drawable};
+use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
@@ -58,7 +58,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
         self.align
     }
 
-    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) {
+    fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let mut index = 0;
         if self.align == Align::Bottom {
             index = output.len() - 1;
@@ -72,7 +72,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
         };
         let wp_theta = telemetry.waypoint.coordinate.theta;
         self.draw_indicator(telemetry.attitude.yaw, wp_theta, output[index].as_mut());
-        self.counter.set(self.counter.get() + 1)
+        self.counter.set(self.counter.get() + 1);
+        2
     }
 }
 
@@ -115,7 +116,7 @@ mod test {
     use crate::drawable::Drawable;
     use crate::symbol::default_symbol_table;
     use crate::telemetry::Telemetry;
-    use crate::test_utils::to_utf8_string;
+    use crate::test_utils::{to_utf8_string, ZeroSlice};
 
     use super::{HeadingTape, HEADING_TAPE_WIDTH};
 
@@ -157,12 +158,12 @@ mod test {
         assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
         assert_eq!("       ^╵        ", to_utf8_string(&buffer[1..2]));
 
-        buffer[1].iter_mut().for_each(|x| *x = 0);
+        buffer[1].zero();
         telemetry.attitude.yaw = 300;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" ^      ╵        ", to_utf8_string(&buffer[1..2]));
 
-        buffer[1].iter_mut().for_each(|x| *x = 0);
+        buffer[1].zero();
         telemetry.attitude.yaw = 90;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!("        ╵      ^ ", to_utf8_string(&buffer[1..2]));
@@ -178,12 +179,12 @@ mod test {
         assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
         assert_eq!("        ^      ╵ ", to_utf8_string(&buffer[1..2]));
 
-        buffer[1].iter_mut().for_each(|x| *x = 0);
+        buffer[1].zero();
         telemetry.waypoint.coordinate.theta = 180;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));
 
-        buffer[1].iter_mut().for_each(|x| *x = 0);
+        buffer[1].zero();
         telemetry.waypoint.coordinate.theta = 270;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));

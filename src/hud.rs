@@ -13,6 +13,7 @@ use crate::speed::Speed;
 use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
 use crate::vertial_speed::VerticalSpeed;
+use crate::waypoint::Waypoint;
 
 #[derive(Enum)]
 pub enum Displayable {
@@ -29,15 +30,14 @@ pub enum Displayable {
     Speed,
     AOA,
     GForce,
+    FlightMode,
 
     // Right
     Altitude,
     VerticalSpeed,
 
-    // BottomLeft
-    FlightMode,
-
     // BottomRight
+    Waypoint,
     Height,
 }
 
@@ -52,6 +52,7 @@ pub struct HUD<'a> {
     rssi: RSSI,
     speed: Speed,
     vertial_speed: VerticalSpeed,
+    waypoint: Waypoint,
     aligns: EnumMap<Displayable, Option<Align>>,
     telemetry_source: &'a dyn TelemetrySource,
 }
@@ -69,17 +70,19 @@ impl<'a> HUD<'a> {
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
             vertial_speed: VerticalSpeed::default(),
+            waypoint: Waypoint::new(&symbols),
             aligns: enum_map! {
                 Displayable::Altitude => Some(Align::Right),
                 Displayable::AOA => Some(Align::Left),
                 Displayable::Battery => Some(Align::TopRight),
-                Displayable::FlightMode => Some(Align::BottomLeft),
+                Displayable::FlightMode => Some(Align::Left),
                 Displayable::GForce => Some(Align::Left),
                 Displayable::HeadingTape => Some(Align::Top),
                 Displayable::Height => Some(Align::BottomRight),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
                 Displayable::VerticalSpeed => Some(Align::Right),
+                Displayable::Waypoint => Some(Align::BottomRight),
             },
             telemetry_source: source,
         }
@@ -97,6 +100,7 @@ impl<'a> HUD<'a> {
             Displayable::RSSI => &self.rssi,
             Displayable::Speed => &self.speed,
             Displayable::VerticalSpeed => &self.vertial_speed,
+            Displayable::Waypoint => &self.waypoint,
         }
     }
 
@@ -123,8 +127,7 @@ impl<'a> HUD<'a> {
                 Align::Left | Align::Right => &mut output[output_len / 2 + indexes[align]..],
                 _ => output,
             };
-            drawable.draw(&telemetry, region);
-            indexes[align] += 1;
+            indexes[align] += drawable.draw(&telemetry, region);
         }
     }
 }
@@ -132,7 +135,7 @@ impl<'a> HUD<'a> {
 #[cfg(test)]
 mod test {
     use crate::symbol::default_symbol_table;
-    use crate::telemetry::{Attitude, Telemetry, TelemetrySource};
+    use crate::telemetry::{Attitude, SphericalCoordinate, Telemetry, TelemetrySource, Waypoint};
     use crate::test_utils::to_utf8_string;
 
     use super::HUD;
@@ -154,6 +157,13 @@ mod test {
                 rssi: 100,
                 speed: 100,
                 vertical_speed: 100,
+                waypoint: Waypoint {
+                    coordinate: SphericalCoordinate {
+                        phi: 47,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
                 ..Default::default()
             }
         }
@@ -186,10 +196,10 @@ mod test {
                         ⍺  ₃1                      100\
                         g  ₁1                        .\
                         .                            .\
-                        .                            .\
-                        .                            .\
-                        .                            .\
-                        MAN                       999R";
+                        .                         999R\
+                        .                       0/HOME\
+                        .                         ₄7NM\
+                        MAN                   00:02:49";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 }
