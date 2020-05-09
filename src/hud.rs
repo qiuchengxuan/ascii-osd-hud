@@ -166,9 +166,9 @@ mod test {
     impl TelemetrySource for StubTelemetrySource {
         fn get_telemetry(&self) -> Telemetry {
             Telemetry {
-                altitude: 3000,
+                altitude: 1000,
                 attitude: Attitude {
-                    yaw: 357,
+                    yaw: 10, // heading
                     ..Default::default()
                 },
                 aoa: 31,
@@ -177,8 +177,8 @@ mod test {
                 rssi: 100,
                 vertical_speed: 100,
                 velocity_vector: SphericalCoordinate {
-                    rho: 100,  // speed
-                    theta: 10, // heading
+                    rho: 100, // speed
+                    theta: 10,
                     phi: -5,
                 },
                 waypoint: Waypoint {
@@ -202,20 +202,20 @@ mod test {
         hud.draw(&mut buffer);
         fill_edge(&mut buffer);
         let expected = "⏉100    000 . 010 . 020   β100\
-                        .        ╵    ^              .\
+                        .        ╵     ^             .\
                         .                            .\
                         .                            .\
                         .                            .\
                         .                            .\
                         .                            .\
                         .                            .\
-                        . 100                     3000\
-                        ⍺  ₃1            ⌖         100\
-                        g  ₁1        ☐               .\
+                        . 100                     1000\
+                        ⍺  ⒊1            ⌖         100\
+                        g  ⒈1        ☐               .\
                         MAN                          .\
                         .                          99R\
                         .                       0/HOME\
-                        .                         ₄7NM\
+                        .                         ⒋7NM\
                         .                     00:02:49";
         assert_eq!(expected, to_utf8_string(&buffer));
     }

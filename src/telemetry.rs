@@ -1,7 +1,7 @@
 pub struct Attitude {
-    pub pitch: u16,
-    pub roll: u16,
-    pub yaw: u16, // ref to current heading
+    pub pitch: i8,
+    pub roll: i8,
+    pub yaw: u16, // ref to north
 }
 
 impl Default for Attitude {
@@ -57,7 +57,7 @@ pub struct Telemetry {
     pub g_force: u8,                          // in g*10
     pub height: u16,                          // feets or meters, same with altitude
     pub rssi: u8,                             // percentage
-    pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot
+    pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
     pub vertical_speed: i16,                  // feets/min or m/s
     pub waypoint: Waypoint,                   //
 }
@@ -86,7 +86,7 @@ impl Telemetry {
     }
 
     pub fn heading(&self) -> u16 {
-        self.velocity_vector.theta
+        self.attitude.yaw
     }
 
     pub fn time_to_go(&self) -> u32 {

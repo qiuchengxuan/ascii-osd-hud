@@ -92,11 +92,11 @@ mod test {
         buffer.iter_mut().for_each(|b| b.zero());
         telemetry.waypoint.coordinate.rho = 99;
         waypoint.draw(&telemetry, &mut buffer);
-        assert_eq!("    0/HOME      ₉9NM  00:09:44", to_utf8_string(&buffer));
+        assert_eq!("    0/HOME      ⒐9NM  00:09:44", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
         telemetry.waypoint.coordinate.rho = 98;
         waypoint.draw(&telemetry, &mut buffer);
-        assert_eq!("    0/HOME      ₉8NM  00:09:38", to_utf8_string(&buffer));
+        assert_eq!("    0/HOME      ⒐8NM  00:09:38", to_utf8_string(&buffer));
     }
 }

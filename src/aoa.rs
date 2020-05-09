@@ -48,7 +48,7 @@ mod test {
         let mut telemetry = Telemetry::default();
         telemetry.aoa = 31;
         aoa.draw(&telemetry, &mut buffer);
-        assert_eq!("⍺  ₃1 ", to_utf8_string(&buffer));
+        assert_eq!("⍺  ⒊1 ", to_utf8_string(&buffer));
 
         buffer[0].iter_mut().for_each(|x| *x = 0);
         telemetry.aoa = 1;

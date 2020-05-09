@@ -48,7 +48,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
         let buffer = output[y as usize].as_mut();
         let buffer_len = buffer.len() as isize;
 
-        let mut heading = telemetry.heading() as isize;
+        let mut heading = telemetry.velocity_vector.theta as isize;
         if heading > 180 {
             heading = heading - 360;
         }

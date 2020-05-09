@@ -46,7 +46,7 @@ mod test {
         let mut telemetry = Telemetry::default();
         telemetry.g_force = 11;
         g_force.draw(&telemetry, &mut buffer);
-        assert_eq!("g  ₁1 ", to_utf8_string(&buffer));
+        assert_eq!("g  ⒈1 ", to_utf8_string(&buffer));
 
         buffer[0].zero();
         telemetry.g_force = 9;
