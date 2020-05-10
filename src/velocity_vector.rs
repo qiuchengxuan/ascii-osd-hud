@@ -37,27 +37,27 @@ impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let speed = telemetry.speed() as isize;
-        let output_len = output.len() as isize;
+        let height = output.len() as isize;
         let y_degree = -with_ratio(speed, telemetry.velocity_vector.phi as isize);
-        let mut y = y_degree * output_len / self.fov_height as isize + output_len / 2;
+        let mut y = y_degree * height / self.fov_height as isize + height / 2;
         if y < 0 {
             y = 0;
-        } else if y >= output_len {
-            y = output_len - 1;
+        } else if y >= height {
+            y = height - 1;
         }
         let buffer = output[y as usize].as_mut();
-        let buffer_len = buffer.len() as isize;
+        let width = buffer.len() as isize;
 
         let mut heading = telemetry.velocity_vector.theta as isize;
         if heading > 180 {
             heading = heading - 360;
         }
         let x_degree = with_ratio(speed, heading);
-        let mut x = x_degree * buffer_len / self.fov_width as isize + buffer_len / 2;
+        let mut x = x_degree * width / self.fov_width as isize + width / 2;
         if x < 0 {
             x = 0;
-        } else if x >= buffer_len {
-            x = buffer_len - 1;
+        } else if x >= width {
+            x = width - 1;
         }
         if buffer[x as usize] == 0 || self.counter.get() % 2 == 0 {
             buffer[x as usize] = self.vector;
@@ -90,7 +90,7 @@ mod test {
                         .                              .\
                         .                              .\
                         .                              .\
-                        .               ⌖              .\
+                        .               ⏂              .\
                         .                              .\
                         .                              .\
                         .                              .\
@@ -106,7 +106,7 @@ mod test {
                         .                              .\
                         .                              .\
                         .                              .\
-                        .                 ⌖            .\
+                        .                 ⏂            .\
                         .                              .\
                         .                              .\
                         .                              .";
@@ -125,7 +125,7 @@ mod test {
                         .                              .\
                         .                              .\
                         .                              .\
-                        .                              ⌖";
+                        .                              ⏂";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 }

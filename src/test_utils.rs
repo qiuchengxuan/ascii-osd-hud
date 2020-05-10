@@ -3,7 +3,7 @@ use std::vec::Vec;
 
 use ascii::ToAsciiChar;
 
-const UTF8_SYMBOLS: &str = " ⏉β°w⌖⍺☐▔⎺⎻⎯⎼⎽▁╵₀⒈⒉⒊⒋⒌⒍⒎⒏⒐▏▕";
+const UTF8_SYMBOLS: &str = " ⏉β°w⏂⍺☐▔⎺⎻─⎼⎽▁╵₀⒈⒉⒊⒋⒌⒍⒎⒏⒐▪│";
 
 pub fn to_utf8_string<T: AsRef<[u8]>>(lines: &[T]) -> String {
     let mut output = String::new();

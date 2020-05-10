@@ -31,6 +31,7 @@ mod g_force;
 mod heading_tape;
 mod height;
 pub mod hud;
+mod pitch_ladder;
 mod rssi;
 mod speed;
 pub mod symbol;

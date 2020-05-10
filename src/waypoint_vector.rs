@@ -31,25 +31,25 @@ impl<T: AsMut<[u8]>> Drawable<T> for WaypointVector {
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let waypoint = &telemetry.waypoint.coordinate;
         let phi = -waypoint.phi as isize;
-        let output_len = output.len() as isize;
-        let mut y = phi * output_len / self.fov_height as isize + output_len / 2;
+        let height = output.len() as isize;
+        let mut y = phi * height / self.fov_height as isize + height / 2;
         if y < 0 {
             y = 0;
-        } else if y >= output_len {
-            y = output_len - 1;
+        } else if y >= height {
+            y = height - 1;
         }
         let buffer = output[y as usize].as_mut();
-        let buffer_len = buffer.len() as isize;
+        let width = buffer.len() as isize;
 
         let mut theta = waypoint.theta as isize;
         if theta > 180 {
             theta = theta - 360;
         }
-        let mut x = theta * buffer_len / self.fov_width as isize + buffer_len / 2;
+        let mut x = theta * width / self.fov_width as isize + width / 2;
         if x < 0 {
             x = 0;
-        } else if x >= buffer_len {
-            x = buffer_len - 1;
+        } else if x >= width {
+            x = width - 1;
         }
         if buffer[x as usize] == 0 || self.counter.get() % 2 == 1 {
             buffer[x as usize] = self.vector;

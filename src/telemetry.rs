@@ -1,7 +1,7 @@
 pub struct Attitude {
-    pub pitch: i8,
-    pub roll: i8,
-    pub yaw: u16, // ref to north
+    pub pitch: i8, // negative means sink
+    pub roll: i8,  // (-90, 90], clock wise
+    pub yaw: u16,  // ref to north
 }
 
 impl Default for Attitude {

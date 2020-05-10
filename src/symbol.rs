@@ -20,9 +20,9 @@ pub enum Symbol {
     LineLower1,
     LineLower2,
     LineBottom,
+    SmallBlackSquare,
+    VerticalLine,
     ZeroWithTraillingDot,
-    LeftOneEighthBlock,
-    RightOneEighthBlock,
 }
 
 pub fn to_number_with_dot(byte: u8, zero_with_trailling_dot: SymbolIndex) -> u8 {
@@ -60,9 +60,9 @@ pub fn default_symbol_table() -> SymbolTable {
         Symbol::LineBottom => 14, // ▁ or ASCII underscore
         Symbol::BoxDrawningLightUp => 15, // ╵ or ASCII |
         Symbol::ZeroWithTraillingDot => 16,
-        // 17~26 number with trailling dot
-        Symbol::LeftOneEighthBlock => 27, // ▏
-        Symbol::RightOneEighthBlock => 28, // ▕
+        // 17~25 number with trailling dot
+        Symbol::SmallBlackSquare => 26, // ▪
+        Symbol::VerticalLine => 27, // ⎪
         // 32-33 ASCII
         // 40-62 ASCII 48-57 0-9
         // 64-95 ASCII

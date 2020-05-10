@@ -25,6 +25,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for GForce {
         let buffer = output[0].as_mut();
         telemetry.g_force.numtoa(10, &mut buffer[2..5]);
         buffer[0] = 'g' as u8;
+        buffer[1..3].iter_mut().for_each(|b| *b = ' ' as u8);
         buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
         1
     }

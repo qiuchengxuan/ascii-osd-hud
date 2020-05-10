@@ -11,6 +11,7 @@ license = "Apache-2.0"
 [dependencies]
 enum-map = {version = "0.6.2", default-features = false}
 numtoa = "0.2.3"
+fastapprox = "0.3.0"
 
 [dev-dependencies]
 ascii = "1.0"

@@ -8,6 +8,7 @@ use crate::flight_mode::FlightMode;
 use crate::g_force::GForce;
 use crate::heading_tape::HeadingTape;
 use crate::height::Height;
+use crate::pitch_ladder::Pitchladder;
 use crate::rssi::RSSI;
 use crate::speed::Speed;
 use crate::symbol::SymbolTable;
@@ -21,6 +22,7 @@ use crate::AspectRatio;
 #[derive(Enum)]
 pub enum Displayable {
     // Bottom
+    Pitchladder,
     VelocityVector,
     WaypointVector,
 
@@ -56,6 +58,7 @@ pub struct HUD<'a> {
     g_force: GForce,
     heading_tape: HeadingTape,
     height: Height,
+    pitch_ladder: Pitchladder,
     rssi: RSSI,
     speed: Speed,
     vertial_speed: VerticalSpeed,
@@ -81,6 +84,7 @@ impl<'a> HUD<'a> {
             g_force: GForce::new(&symbols),
             heading_tape: HeadingTape::new(&symbols),
             height: Height::default(),
+            pitch_ladder: Pitchladder::new(&symbols, fov, aspect_ratio),
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
             vertial_speed: VerticalSpeed::default(),
@@ -95,6 +99,7 @@ impl<'a> HUD<'a> {
                 Displayable::GForce => Some(Align::Left),
                 Displayable::HeadingTape => Some(Align::Top),
                 Displayable::Height => Some(Align::BottomRight),
+                Displayable::Pitchladder => Some(Align::Center),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
                 Displayable::VerticalSpeed => Some(Align::Right),
@@ -115,6 +120,7 @@ impl<'a> HUD<'a> {
             Displayable::GForce => &self.g_force,
             Displayable::HeadingTape => &self.heading_tape,
             Displayable::Height => &self.height,
+            Displayable::Pitchladder => &self.pitch_ladder,
             Displayable::RSSI => &self.rssi,
             Displayable::Speed => &self.speed,
             Displayable::VerticalSpeed => &self.vertial_speed,
@@ -168,6 +174,8 @@ mod test {
             Telemetry {
                 altitude: 1000,
                 attitude: Attitude {
+                    pitch: 10,
+                    roll: -10,
                     yaw: 10, // heading
                     ..Default::default()
                 },
@@ -185,7 +193,7 @@ mod test {
                     coordinate: SphericalCoordinate {
                         rho: 47,
                         theta: 350,
-                        phi: -10,
+                        phi: -14,
                     },
                     ..Default::default()
                 },
@@ -201,6 +209,7 @@ mod test {
         let hud = HUD::new(&StubTelemetrySource {}, &symbols, 150, AspectRatio::Wide);
         hud.draw(&mut buffer);
         fill_edge(&mut buffer);
+
         let expected = "⏉100    000 . 010 . 020   β100\
                         .        ╵     ^             .\
                         .                            .\
@@ -210,9 +219,9 @@ mod test {
                         .                            .\
                         .                            .\
                         . 100                     1000\
-                        ⍺  ⒊1            ⌖         100\
-                        g  ⒈1        ☐               .\
-                        MAN                          .\
+                        ⍺  ⒊1⎼⎽⎽▁▁       ⏂         100\
+                        g  ⒈1     ▔⎺⎺⎻⎻─⎼⎼⎽⎽▁        .\
+                        MAN          ☐       ▔▔⎺⎺⎻──⎼⎼\
                         .                          99R\
                         .                       0/HOME\
                         .                         ⒋7NM\
