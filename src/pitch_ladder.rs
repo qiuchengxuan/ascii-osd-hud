@@ -1,4 +1,4 @@
-use fastapprox::faster::tan;
+use micromath::F32Ext;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
@@ -69,7 +69,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         let height = output.len() as isize;
         let width = output[0].as_mut().len() as isize;
 
-        let k = tan(-telemetry.attitude.roll as f32 / 57.3); // y / x
+        let k = (-telemetry.attitude.roll as f32 / 57.3).tan(); // y / x
         let y_offset = telemetry.attitude.pitch as isize * height / self.fov_height;
 
         let symbols = if telemetry.attitude.roll == 90 {

@@ -14,11 +14,11 @@ checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
 
 [[package]]
 name = "ascii-osd-hud"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ascii",
  "enum-map",
- "fastapprox",
+ "micromath",
  "numtoa",
 ]
 
@@ -44,10 +44,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "fastapprox"
-version = "0.3.0"
+name = "micromath"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0031c93f37b5d18272de2d932ebff6a7eb32d4bc3bab6751a9af42da7d1a424"
+checksum = "c61d2b2dd22f6e15164f8ae1b6cec2028662c57e210c5809328bd065f92eba13"
 
 [[package]]
 name = "numtoa"
