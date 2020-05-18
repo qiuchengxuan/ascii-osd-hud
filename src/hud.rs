@@ -130,7 +130,7 @@ impl<'a> HUD<'a> {
         }
     }
 
-    pub fn draw<T: AsMut<[u8]>>(&self, output: &mut [T]) {
+    pub fn draw<'b, T: AsMut<[u8]>>(&self, output: &'b mut [T]) -> &'b [T] {
         output.iter_mut().for_each(|line| {
             for x in line.as_mut() {
                 *x = 0
@@ -155,6 +155,7 @@ impl<'a> HUD<'a> {
             };
             indexes[align] += drawable.draw(&telemetry, region);
         }
+        output
     }
 }
 

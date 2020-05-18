@@ -1,3 +1,4 @@
+#[allow(unused)] // false warning
 use micromath::F32Ext;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -166,15 +167,15 @@ mod test {
         telemetry.attitude.roll = -45;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = "▔⎻⎼▁                           .\
-                        .   ⎺─⎽▁                       .\
-                        .      ▔⎻⎼▁                    .\
+        let expected = "⎺─⎽▁                           .\
+                        .  ▔⎻⎼▁                        .\
+                        .      ⎺⎻⎼▁                    .\
                         .          ⎺─⎽▁                .\
                         .             ▔⎻─⎽▁            .\
                         .                 ▔⎻⎼▁         .\
-                        .                     ⎺─⎽▁     .\
-                        .                        ▔⎻⎼▁  .\
-                        .                            ⎺─⎽";
+                        .                     ⎺─⎼▁     .\
+                        .                         ⎺─⎽▁ .\
+                        .                            ▔⎻⎼";
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());

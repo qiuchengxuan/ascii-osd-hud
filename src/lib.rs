@@ -35,7 +35,7 @@ mod pitch_ladder;
 mod rssi;
 mod speed;
 pub mod symbol;
-mod telemetry;
+pub mod telemetry;
 #[cfg(test)]
 mod test_utils;
 mod velocity_vector;
