@@ -72,7 +72,7 @@ pub struct HUD<'a> {
 impl<'a> HUD<'a> {
     pub fn new(
         source: &'a dyn TelemetrySource,
-        symbols: &'a SymbolTable,
+        symbols: &SymbolTable,
         fov: u8,
         aspect_ratio: AspectRatio,
     ) -> HUD<'a> {

@@ -70,12 +70,13 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         let height = output.len() as isize;
         let width = output[0].as_mut().len() as isize;
 
-        let k = (-telemetry.attitude.roll as f32 / 57.3).tan(); // y / x
+        let roll = telemetry.attitude.roll % 91;
+        let k = (-roll as f32 / 57.3).tan(); // y / x
         let y_offset = telemetry.attitude.pitch as isize * height / self.fov_height;
 
-        let symbols = if telemetry.attitude.roll == 90 {
+        let symbols = if roll == 90 {
             &self.symbols[VERTICAL_LINE..VERTICAL_LINE + 1]
-        } else if telemetry.attitude.roll >= 60 || telemetry.attitude.roll <= -60 {
+        } else if roll >= 60 || roll <= -60 {
             &self.symbols[SMALL_BLACK_SQUARE..SMALL_BLACK_SQUARE + 1]
         } else {
             &self.symbols[..SMALL_BLACK_SQUARE]
@@ -207,5 +208,16 @@ mod test {
                         .               │              .\
                         .               │              .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
+
+    #[test]
+    fn test_ranges() {
+        let mut telemetry = Telemetry::default();
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, AspectRatio::Wide);
+        for i in 0..180 {
+            telemetry.attitude.roll = i as i8;
+            pitch_ladder.draw(&telemetry, &mut buffer);
+        }
     }
 }
