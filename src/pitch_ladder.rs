@@ -70,7 +70,13 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         let height = output.len() as isize;
         let width = output[0].as_mut().len() as isize;
 
-        let roll = telemetry.attitude.roll % 91;
+        let mut roll = telemetry.attitude.roll;
+        if roll >= 90 {
+            roll = 90
+        } else if roll <= -90 {
+            roll = 89
+        }
+
         let k = (-roll as f32 / 57.3).tan(); // y / x
         let y_offset = telemetry.attitude.pitch as isize * height / self.fov_height;
 

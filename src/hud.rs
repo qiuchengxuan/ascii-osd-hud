@@ -133,7 +133,11 @@ impl<'a> HUD<'a> {
     pub fn draw<'b, T: AsMut<[u8]>>(&self, output: &'b mut [T]) -> &'b [T] {
         output.iter_mut().for_each(|line| {
             for x in line.as_mut() {
-                *x = 0
+                if *x == ' ' as u8 {
+                    *x = 0
+                } else if *x > 0 {
+                    *x = ' ' as u8
+                }
             }
         });
         let output_len = output.len();

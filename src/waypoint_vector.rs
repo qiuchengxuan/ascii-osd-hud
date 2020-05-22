@@ -51,7 +51,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for WaypointVector {
         } else if x >= width {
             x = width - 1;
         }
-        if buffer[x as usize] == 0 || self.counter.get() % 2 == 1 {
+        let byte = buffer[x as usize];
+        if byte == 0 || byte == ' ' as u8 || self.counter.get() % 2 == 1 {
             buffer[x as usize] = self.vector;
         }
         self.counter.set(self.counter.get() + 1);

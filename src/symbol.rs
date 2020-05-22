@@ -31,10 +31,8 @@ pub fn to_number_with_dot(byte: u8, zero_with_trailling_dot: SymbolIndex) -> u8 
         } else {
             byte - ('0' as u8 - zero_with_trailling_dot)
         }
-    } else if byte == 0 {
-        zero_with_trailling_dot
     } else {
-        byte
+        zero_with_trailling_dot
     }
 }
 

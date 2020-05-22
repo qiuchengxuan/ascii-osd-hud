@@ -84,7 +84,7 @@ fn draw_heading(output: &mut [u8], number: u16) {
 }
 
 fn draw_tape(heading: u16, output: &mut [u8]) {
-    let mut buffer: [u8; HEADING_TAPE_WIDTH + 4] = [0; HEADING_TAPE_WIDTH + 4];
+    let mut buffer: [u8; HEADING_TAPE_WIDTH + 4] = [' ' as u8; HEADING_TAPE_WIDTH + 4];
     let lower_heading = heading / 10 * 10;
     let upper_heading = lower_heading + 10;
     let center = HEADING_TAPE_WIDTH / 2 + 2;
