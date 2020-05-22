@@ -211,7 +211,7 @@ mod test {
     fn test_hud() {
         let mut buffer = [[0u8; 30]; 16];
         let symbols = default_symbol_table();
-        let hud = HUD::new(&StubTelemetrySource {}, &symbols, 150, AspectRatio::Wide);
+        let hud = HUD::new(&StubTelemetrySource {}, &symbols, 150, aspect_ratio!(16:9));
         hud.draw(&mut buffer);
         fill_edge(&mut buffer);
 

@@ -81,7 +81,7 @@ mod test {
     #[test]
     fn test_velocity_vector() {
         let mut buffer = [[0u8; 32]; 9];
-        let velocity_vector = VelocityVector::new(&default_symbol_table(), 18, AspectRatio::Wide);
+        let velocity_vector = VelocityVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
         let mut telemetry = Telemetry::default();
         telemetry.velocity_vector.theta = 1;
         telemetry.velocity_vector.phi = -1;

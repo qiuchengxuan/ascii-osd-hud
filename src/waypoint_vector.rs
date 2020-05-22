@@ -73,7 +73,7 @@ mod test {
     #[test]
     fn test_waypoint_vector() {
         let mut buffer = [[0u8; 32]; 9];
-        let waypoint_vector = WaypointVector::new(&default_symbol_table(), 18, AspectRatio::Wide);
+        let waypoint_vector = WaypointVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
         let mut telemetry = Telemetry::default();
         telemetry.waypoint.coordinate.theta = 1;
         telemetry.waypoint.coordinate.phi = -1;

@@ -19,8 +19,11 @@ pub enum Symbol {
     LineLower1,
     LineLower2,
     LineBottom,
-    SmallBlackSquare,
-    VerticalLine,
+    LineLeft,
+    LineLeft1,
+    LineVerticalCenter,
+    LineRight1,
+    LineRight,
     ZeroWithTraillingDot,
 }
 
@@ -56,7 +59,10 @@ pub fn default_symbol_table() -> SymbolTable {
         Symbol::LineBottom => 141, // ▁ or ASCII underscore
         Symbol::BoxDrawningLightUp => 142, // ╵ or ASCII |
         Symbol::ZeroWithTraillingDot => 143,
-        Symbol::SmallBlackSquare => 153, // ▪
-        Symbol::VerticalLine => 154, // ⎪
+        Symbol::LineLeft => 153, // ▏
+        Symbol::LineLeft1 => 154,
+        Symbol::LineVerticalCenter => 155, // ⎪
+        Symbol::LineRight1 => 156,
+        Symbol::LineRight => 157, // ▕
     }
 }

@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Attitude {
     pub pitch: i8, // negative means sink
     pub roll: i8,  // (-90, 90], clock wise
@@ -14,6 +15,7 @@ impl Default for Attitude {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct SphericalCoordinate {
     pub rho: u16,   // ρ or radius
     pub theta: u16, // θ, 0 <= θ < 360, azimuthal angle
@@ -30,6 +32,7 @@ impl Default for SphericalCoordinate {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Waypoint {
     pub number: u8,                      // e.g. 0 means home or base
     pub name: [u8; 4],                   // e.g. "HOME" when number = 0
@@ -48,6 +51,7 @@ impl Default for Waypoint {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Telemetry {
     pub altitude: u16,                        // feets or meters
     pub aoa: u8,                              // in degree*10
