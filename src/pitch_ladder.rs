@@ -71,7 +71,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
             roll = 89
         }
 
-        let k1000 = -((roll as f32 / 57.3).tan() * 1000.0) as isize; // y / x
+        let k1000 = ((roll as f32 / 180.0 * core::f32::consts::PI).tan() * 1000.0) as isize; // y / x
         let y_offset = telemetry.attitude.pitch as isize * height / self.fov_height;
 
         if -60 <= roll && roll <= 60 {
@@ -137,7 +137,7 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.attitude.roll = 15;
+        telemetry.attitude.roll = -15;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
@@ -152,7 +152,7 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.attitude.roll = -15;
+        telemetry.attitude.roll = 15;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
@@ -167,7 +167,7 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.attitude.roll = 30;
+        telemetry.attitude.roll = -30;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
@@ -182,22 +182,22 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.attitude.roll = -45;
+        telemetry.attitude.roll = 45;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = "⎺─⎽▁                           .\
-                        .  ▔⎻⎼▁                        .\
-                        .      ⎺⎻⎼▁                    .\
+        let expected = "▔⎻⎼▁                           .\
+                        .   ⎺─⎽▁                       .\
+                        .      ▔⎻⎼▁                    .\
                         .          ⎺─⎽▁                .\
                         .             ▔⎻─⎽▁            .\
                         .                 ▔⎻⎼▁         .\
-                        .                     ⎺─⎼▁     .\
-                        .                         ⎺─⎽▁ .\
-                        .                            ▔⎻⎼";
+                        .                     ⎺─⎽▁     .\
+                        .                        ▔⎻⎼▁  .\
+                        .                            ⎺─⎽";
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.attitude.roll = 80;
+        telemetry.attitude.roll = -80;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                 ⎪            .\

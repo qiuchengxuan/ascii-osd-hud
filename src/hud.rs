@@ -180,7 +180,7 @@ mod test {
                 altitude: 1000,
                 attitude: Attitude {
                     pitch: 10,
-                    roll: -10,
+                    roll: 10,
                     yaw: 10, // heading
                     ..Default::default()
                 },
