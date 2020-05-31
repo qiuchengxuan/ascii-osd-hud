@@ -11,6 +11,8 @@ pub struct Pitchladder {
     fov_height: isize,
 }
 
+const DEGREE_PER_RAD: f32 = 180.0 / core::f32::consts::PI;
+
 type Point = (isize, isize);
 
 impl Pitchladder {
@@ -70,9 +72,9 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         } else if roll <= -90 {
             roll = 89
         }
+        let pitch = telemetry.attitude.pitch as isize;
 
-        let k1000 = ((roll as f32 / 180.0 * core::f32::consts::PI).tan() * 1000.0) as isize; // y / x
-        let y_offset = telemetry.attitude.pitch as isize * height / self.fov_height;
+        let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() * 1000.0) as isize; // y / x
 
         if -60 <= roll && roll <= 60 {
             let symbols = &self.horizental_symbols;
@@ -84,9 +86,10 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
                 }
             };
             let num_symbols = symbols.len() as isize;
+            let y_offset = pitch * height * num_symbols / self.fov_height + num_symbols / 2;
             let y = ((width / 2 * height * num_symbols / width) * k1000 / 1000) as isize;
-            let y0 = -y + (height / 2 + y_offset) * num_symbols + num_symbols / 2;
-            let y1 = y + (height / 2 + y_offset) * num_symbols + num_symbols / 2;
+            let y0 = -y + (height / 2) * num_symbols + y_offset;
+            let y1 = y + (height / 2) * num_symbols + y_offset;
             self.draw_line((0, y0), (width, y1), callback);
         } else {
             let symbols = &self.vertical_symbols;
@@ -98,8 +101,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
                 }
             };
             let num_symbols = symbols.len() as isize;
-            let x =
-                (((height + y_offset) / 2 * width * num_symbols / height) * 1000 / k1000) as isize;
+            let y_offset = pitch * height * num_symbols / self.fov_height;
+            let x = ((height + y_offset) / 2 * width * num_symbols / height) * 1000 / k1000;
             let x0 = -x + (width / 2) * num_symbols + num_symbols / 2;
             let x1 = x + (width / 2) * num_symbols + num_symbols / 2;
             self.draw_line((0, x0), (height, x1), callback);
@@ -113,16 +116,16 @@ mod test {
     use crate::drawable::Drawable;
     use crate::symbol::default_symbol_table;
     use crate::telemetry::Telemetry;
-    use crate::test_utils::{fill_edge, to_utf8_string, ZeroSlice};
+    use crate::test_utils::{fill_edge, to_utf8_string};
     use crate::AspectRatio;
 
     use super::Pitchladder;
 
     #[test]
-    fn test_pitch_ladder() {
+    fn test_horizental() {
         let mut buffer = [[0u8; 32]; 9];
         let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
-        let mut telemetry = Telemetry::default();
+        let telemetry = Telemetry::default();
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
@@ -135,8 +138,33 @@ mod test {
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_pitch() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 150, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
+        telemetry.attitude.pitch = 7;
+        pitch_ladder.draw(&telemetry, &mut buffer);
+        fill_edge(&mut buffer);
+        let expected = ".                              .\
+                        .                              .\
+                        .                              .\
+                        .                              .\
+                        .                              .\
+                        ⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻⎻\
+                        .                              .\
+                        .                              .\
+                        .                              .";
+        assert_eq!(expected, to_utf8_string(&buffer));
+    }
+
+    #[test]
+    fn test_shallow_roll_left() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -15;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -150,8 +178,13 @@ mod test {
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_shallow_roll_right() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 15;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -165,8 +198,13 @@ mod test {
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_roll_left() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -30;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -180,8 +218,13 @@ mod test {
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_roll_right() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 45;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -195,8 +238,13 @@ mod test {
                         .                        ▔⎻⎼▁  .\
                         .                            ⎺─⎽";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_deep_roll_left() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -80;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -210,8 +258,13 @@ mod test {
                         .              ▏               .\
                         .             |                .";
         assert_eq!(expected, to_utf8_string(&buffer));
+    }
 
-        buffer.iter_mut().for_each(|b| b.zero());
+    #[test]
+    fn test_vertical() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 90;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
