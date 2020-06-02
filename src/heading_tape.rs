@@ -62,7 +62,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
         if self.align == Align::Bottom {
             index = output.len() - 1;
         }
-        draw_tape(telemetry.heading(), output[index].as_mut());
+        draw_tape(telemetry.heading, output[index].as_mut());
 
         if self.align == Align::Top {
             index += 1
@@ -136,13 +136,13 @@ mod test {
         let mut buffer: [[u8; HEADING_TAPE_WIDTH + 2]; 2] = [[0; HEADING_TAPE_WIDTH + 2]; 2];
         let tape = HeadingTape::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
-        telemetry.attitude.yaw = 359;
+        telemetry.heading = 359;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!("  350 . 000 . 01 ", to_utf8_string(&buffer[0..1]));
-        telemetry.attitude.yaw = 358;
+        telemetry.heading = 358;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" . 350 . 000 . 0 ", to_utf8_string(&buffer[0..1]));
-        telemetry.attitude.yaw = 356;
+        telemetry.heading = 356;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!("  . 350 . 000 .  ", to_utf8_string(&buffer[0..1]));
     }

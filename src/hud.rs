@@ -181,9 +181,8 @@ mod test {
                 attitude: Attitude {
                     pitch: 10,
                     roll: 10,
-                    yaw: 10, // heading
-                    ..Default::default()
                 },
+                heading: 10,
                 aoa: 31,
                 g_force: 11,
                 height: 99,
@@ -219,14 +218,14 @@ mod test {
                         .        ╵     ^             .\
                         .                            .\
                         .                            .\
-                        .                            .\
-                        .                            .\
-                        .                            .\
-                        .                            .\
+                        ▁                            .\
+                        .▔▔⎺⎻⎻─⎼⎼⎽▁▁                 .\
+                        .           ▔⎺⎺⎻──⎼⎽⎽▁       .\
+                        .                     ▔▔⎺⎻⎻─⎼⎼\
                         . 100                     1000\
-                        ⍺  ⒊1⎽▁▁         ⏂         100\
-                        g  ⒈1   ▔▔⎺⎻⎻──⎼⎽⎽▁▁         .\
-                        MAN          ☐      ▔⎺⎺⎻⎻─⎼⎼⎽⎽\
+                        ⍺  ⒊1            ⏂         100\
+                        g  ⒈1                        .\
+                        MAN          ☐               .\
                         .                          99R\
                         .                       0/HOME\
                         .                         ⒋7NM\

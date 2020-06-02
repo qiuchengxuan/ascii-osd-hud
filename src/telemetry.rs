@@ -1,21 +1,16 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Attitude {
-    pub pitch: i8, // negative means sink
-    pub roll: i8,  // (-90, 90], clock wise
-    pub yaw: u16,  // ref to north
+    pub pitch: i8, // [-90, 90], negative means sink
+    pub roll: i8,  // [-90, 90], clock wise
 }
 
 impl Default for Attitude {
     fn default() -> Self {
-        Self {
-            pitch: 0,
-            roll: 0,
-            yaw: 0,
-        }
+        Self { pitch: 0, roll: 0 }
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct SphericalCoordinate {
     pub rho: u16,   // ρ or radius
     pub theta: u16, // θ, 0 <= θ < 360, azimuthal angle
@@ -32,7 +27,7 @@ impl Default for SphericalCoordinate {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Waypoint {
     pub number: u8,                      // e.g. 0 means home or base
     pub name: [u8; 4],                   // e.g. "HOME" when number = 0
@@ -51,11 +46,12 @@ impl Default for Waypoint {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Telemetry {
     pub altitude: u16,                        // feets or meters
     pub aoa: u8,                              // in degree*10
     pub attitude: Attitude,                   // in degree
+    pub heading: u16,                         // [0, 360), ref to north
     pub battery: u8,                          // percentage
     pub flight_mode: [u8; 4],                 //
     pub g_force: u8,                          // in g*10
@@ -71,6 +67,7 @@ impl<'a> Default for Telemetry {
         Telemetry {
             altitude: 0,
             attitude: Attitude::default(),
+            heading: 0,
             aoa: 0,
             battery: 100,
             flight_mode: *b"MAN ",
@@ -87,10 +84,6 @@ impl<'a> Default for Telemetry {
 impl Telemetry {
     pub fn speed(&self) -> u16 {
         self.velocity_vector.rho
-    }
-
-    pub fn heading(&self) -> u16 {
-        self.attitude.yaw
     }
 
     pub fn time_to_go(&self) -> u32 {
