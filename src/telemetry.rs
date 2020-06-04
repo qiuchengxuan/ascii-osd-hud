@@ -1,7 +1,7 @@
 #[derive(Copy, Clone, Debug)]
 pub struct Attitude {
     pub pitch: i8, // [-90, 90], negative means sink
-    pub roll: i8,  // [-90, 90], clock wise
+    pub roll: i16, // [-180, 180], clock wise
 }
 
 impl Default for Attitude {
