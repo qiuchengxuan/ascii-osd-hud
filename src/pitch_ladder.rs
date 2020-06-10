@@ -79,7 +79,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         let ratio = self.aspect_ratio / (width as f32 / height as f32);
         let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() / ratio * 1000.0) as isize; // y / x
 
-        if -60 <= roll && roll <= 60 {
+        if -70 <= roll && roll <= 70 {
             let symbols = &self.horizental_symbols;
             let callback = |x, y| {
                 let y_index = y / symbols.len() as isize;
@@ -90,25 +90,23 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
             };
             let num_symbols = symbols.len() as isize;
             let y_offset = pitch * height * num_symbols / self.fov_height + num_symbols / 2;
-            let y = ((width / 2 * height * num_symbols / width) * k1000 / 1000) as isize;
-            let y0 = -y + (height / 2) * num_symbols + y_offset;
-            let y1 = y + (height / 2) * num_symbols + y_offset;
+            let y_center = ((width / 2 * height * num_symbols / width) * k1000 / 1000) as isize;
+            let y0 = -y_center + (height / 2) * num_symbols + y_offset;
+            let y1 = y_center + (height / 2) * num_symbols + y_offset;
             self.draw_line((0, y0), (width, y1), callback);
         } else {
             let symbols = &self.vertical_symbols;
-            let callback = |y, x| {
-                let x_index = x / symbols.len() as isize;
-                if 0 <= x_index && x_index < width && 0 <= y && y < height {
+            let num_symbols = symbols.len() as isize;
+            let y_offset = pitch * height / self.fov_height;
+            let x_offset = width / 2 * num_symbols + num_symbols / 2;
+            for y in 0..height {
+                let x = (y - (height / 2) - y_offset) * num_symbols * 1000 / k1000 + x_offset;
+                let x_index = x / num_symbols as isize;
+                if 0 <= x_index && x_index < width {
                     let symbol = symbols[x as usize % symbols.len()];
                     output[y as usize].as_mut()[x_index as usize] = symbol;
                 }
-            };
-            let num_symbols = symbols.len() as isize;
-            let y_offset = pitch * height * num_symbols / self.fov_height;
-            let x = ((height + y_offset) / 2 * width * num_symbols / height) * 1000 / k1000;
-            let x0 = -x + (width / 2) * num_symbols + num_symbols / 2;
-            let x1 = x + (width / 2) * num_symbols + num_symbols / 2;
-            self.draw_line((0, x0), (height, x1), callback);
+            }
         }
         0
     }
@@ -251,15 +249,36 @@ mod test {
         telemetry.attitude.roll = -80;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = ".                 ⎪            .\
-                        .                 ▏            .\
-                        .                ⎪▏            .\
-                        .                ▏             .\
+        let expected = ".                ▏             .\
                         .               ⎪              .\
+                        .               ⎪              .\
+                        .               |              .\
+                        .               |              .\
+                        .               |              .\
                         .               ▏              .\
-                        .              |               .\
-                        .              ▏               .\
-                        .             |                .";
+                        .               ▏              .\
+                        .              ⎪               .";
+        assert_eq!(expected, to_utf8_string(&buffer));
+    }
+
+    #[test]
+    fn test_roll_more_than_70_with_pitch() {
+        let mut buffer = [[0u8; 32]; 9];
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let mut telemetry = Telemetry::default();
+        telemetry.attitude.roll = 71;
+        telemetry.attitude.pitch = 10;
+        pitch_ladder.draw(&telemetry, &mut buffer);
+        fill_edge(&mut buffer);
+        let expected = ".                |             .\
+                        .                ⎪             .\
+                        .                 ▏            .\
+                        .                 |            .\
+                        .                 ⎪            .\
+                        .                  ▏           .\
+                        .                  |           .\
+                        .                  ⎪           .\
+                        .                   ▏          .";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 

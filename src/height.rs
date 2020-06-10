@@ -42,16 +42,16 @@ mod test {
 
     #[test]
     fn test_height() {
-        let mut buffer = [[0u8; 6]];
+        let mut buffer = [[0u8; 7]];
         let height = Height::default();
         let mut telemetry = Telemetry::default();
         telemetry.height = 98;
         height.draw(&telemetry, &mut buffer);
-        assert_eq!("   98R", to_utf8_string(&buffer));
+        assert_eq!("    98R", to_utf8_string(&buffer));
 
         buffer[0].iter_mut().for_each(|x| *x = 0);
         telemetry.height = 100;
         height.draw(&telemetry, &mut buffer);
-        assert_eq!("      ", to_utf8_string(&buffer));
+        assert_eq!("       ", to_utf8_string(&buffer));
     }
 }

@@ -23,6 +23,8 @@ use crate::AspectRatio;
 pub enum Displayable {
     // Bottom
     Pitchladder,
+
+    // Center
     VelocityVector,
     WaypointVector,
 
@@ -99,7 +101,7 @@ impl<'a> HUD<'a> {
                 Displayable::GForce => Some(Align::Left),
                 Displayable::HeadingTape => Some(Align::Top),
                 Displayable::Height => Some(Align::BottomRight),
-                Displayable::Pitchladder => Some(Align::Center),
+                Displayable::Pitchladder => Some(Align::Bottom),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
                 Displayable::VerticalSpeed => Some(Align::Right),

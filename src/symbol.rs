@@ -8,7 +8,6 @@ pub enum Symbol {
     Battery,
     BoxDrawningLightUp,
     Degree,
-    CrossHair,
     VeclocityVector,
     Alpha,
     Square,
@@ -46,23 +45,22 @@ pub fn default_symbol_table() -> SymbolTable {
         Symbol::Antenna => 128,
         Symbol::Battery => 129,
         Symbol::Degree => 130,
-        Symbol::CrossHair => 131,
-        Symbol::VeclocityVector => 132,
-        Symbol::Alpha => 133,
-        Symbol::Square => 134,
-        Symbol::LineTop => 135, // ▔
-        Symbol::LineUpper1 => 136, // ⎺
-        Symbol::LineUpper2 => 137, // ⎻
-        Symbol::LineCenter => 138, // ⎯ or ASCII dash
-        Symbol::LineLower1 => 139, // ⎼
-        Symbol::LineLower2 => 140, // ⎽
-        Symbol::LineBottom => 141, // ▁ or ASCII underscore
-        Symbol::BoxDrawningLightUp => 142, // ╵ or ASCII |
-        Symbol::ZeroWithTraillingDot => 143,
-        Symbol::LineLeft => 153, // ▏
-        Symbol::LineLeft1 => 154,
-        Symbol::LineVerticalCenter => 155, // ⎪
-        Symbol::LineRight1 => 156,
-        Symbol::LineRight => 157, // ▕
+        Symbol::VeclocityVector => 131,
+        Symbol::Alpha => 132,
+        Symbol::Square => 133,
+        Symbol::LineTop => 134, // ▔
+        Symbol::LineUpper1 => 135, // ⎺
+        Symbol::LineUpper2 => 136, // ⎻
+        Symbol::LineCenter => 137, // ⎯ or ASCII dash
+        Symbol::LineLower1 => 138, // ⎼
+        Symbol::LineLower2 => 139, // ⎽
+        Symbol::LineBottom => 140, // ▁ or ASCII underscore
+        Symbol::BoxDrawningLightUp => 141, // ╵ or ASCII |
+        Symbol::ZeroWithTraillingDot => 142,
+        Symbol::LineLeft => 152, // ▏
+        Symbol::LineLeft1 => 153,
+        Symbol::LineVerticalCenter => 154, // ⎪
+        Symbol::LineRight1 => 155,
+        Symbol::LineRight => 156, // ▕
     }
 }

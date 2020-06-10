@@ -48,14 +48,14 @@ impl Default for Waypoint {
 
 #[derive(Copy, Clone, Debug)]
 pub struct Telemetry {
-    pub altitude: u16,                        // feets or meters
+    pub altitude: i16,                        // feets or meters
     pub aoa: u8,                              // in degree*10
     pub attitude: Attitude,                   // in degree
     pub heading: u16,                         // [0, 360), ref to north
     pub battery: u8,                          // percentage
     pub flight_mode: [u8; 4],                 //
     pub g_force: u8,                          // in g*10
-    pub height: u16,                          // feets or meters, same with altitude
+    pub height: i16,                          // feets or meters, same with altitude
     pub rssi: u8,                             // percentage
     pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
     pub vertical_speed: i16,                  // feets/min or m/s
