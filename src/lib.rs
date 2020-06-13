@@ -1,7 +1,29 @@
 #![no_std]
 
 #[derive(Copy, Clone, PartialEq)]
-pub struct AspectRatio(pub i8, pub i8);
+pub struct PixelRatio(pub u8, pub u8);
+
+impl From<(u8, u8)> for PixelRatio {
+    fn from(tuple: (u8, u8)) -> Self {
+        Self(tuple.0, tuple.1)
+    }
+}
+
+#[macro_export]
+macro_rules! pixel_ratio {
+    ($w:tt: $h:tt) => {
+        PixelRatio($w, $h)
+    };
+}
+
+#[derive(Copy, Clone, PartialEq)]
+pub struct AspectRatio(pub u8, pub u8);
+
+impl From<(u8, u8)> for AspectRatio {
+    fn from(tuple: (u8, u8)) -> Self {
+        Self(tuple.0, tuple.1)
+    }
+}
 
 #[macro_export]
 macro_rules! aspect_ratio {
@@ -10,17 +32,10 @@ macro_rules! aspect_ratio {
     };
 }
 
-impl Into<f32> for AspectRatio {
-    fn into(self) -> f32 {
-        self.0 as f32 / self.1 as f32
-    }
-}
-
 impl AspectRatio {
     pub fn diagonal_to_width(&self, diagonal: usize) -> usize {
         match self {
             AspectRatio(16, 9) => diagonal * 1600 / 1835,
-            AspectRatio(5, 4) => diagonal * 500 / 640,
             AspectRatio(4, 3) => diagonal * 4 / 5,
             _ => diagonal * 1000 / 1414,
         }
@@ -29,7 +44,6 @@ impl AspectRatio {
     pub fn diagonal_to_height(&self, diagonal: usize) -> usize {
         match self {
             AspectRatio(16, 9) => diagonal * 900 / 1835,
-            AspectRatio(5, 4) => diagonal * 400 / 640,
             AspectRatio(4, 3) => diagonal * 3 / 5,
             _ => diagonal * 1000 / 1414,
         }

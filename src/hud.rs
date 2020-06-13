@@ -17,7 +17,7 @@ use crate::velocity_vector::VelocityVector;
 use crate::vertial_speed::VerticalSpeed;
 use crate::waypoint::Waypoint;
 use crate::waypoint_vector::WaypointVector;
-use crate::AspectRatio;
+use crate::{AspectRatio, PixelRatio};
 
 #[derive(Enum)]
 pub enum Displayable {
@@ -76,6 +76,7 @@ impl<'a> HUD<'a> {
         source: &'a dyn TelemetrySource,
         symbols: &SymbolTable,
         fov: u8,
+        pixel_ratio: PixelRatio,
         aspect_ratio: AspectRatio,
     ) -> HUD<'a> {
         HUD {
@@ -86,7 +87,7 @@ impl<'a> HUD<'a> {
             g_force: GForce::new(&symbols),
             heading_tape: HeadingTape::new(&symbols),
             height: Height::default(),
-            pitch_ladder: Pitchladder::new(&symbols, fov, aspect_ratio),
+            pitch_ladder: Pitchladder::new(&symbols, fov, pixel_ratio, aspect_ratio),
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
             vertial_speed: VerticalSpeed::default(),
@@ -170,7 +171,7 @@ mod test {
     use crate::symbol::default_symbol_table;
     use crate::telemetry::{Attitude, SphericalCoordinate, Telemetry, TelemetrySource, Waypoint};
     use crate::test_utils::{fill_edge, to_utf8_string};
-    use crate::AspectRatio;
+    use crate::{AspectRatio, PixelRatio};
 
     use super::HUD;
 
@@ -212,7 +213,14 @@ mod test {
     fn test_hud() {
         let mut buffer = [[0u8; 30]; 16];
         let symbols = default_symbol_table();
-        let hud = HUD::new(&StubTelemetrySource {}, &symbols, 150, aspect_ratio!(16:9));
+        let px_ratio = pixel_ratio!(16:30);
+        let hud = HUD::new(
+            &StubTelemetrySource {},
+            &symbols,
+            150,
+            px_ratio,
+            aspect_ratio!(16:9),
+        );
         hud.draw(&mut buffer);
         fill_edge(&mut buffer);
 
@@ -220,10 +228,10 @@ mod test {
                         .        ╵     ^             .\
                         .                            .\
                         .                            .\
-                        ▁                            .\
-                        .▔▔⎺⎻⎻─⎼⎼⎽▁▁                 .\
-                        .           ▔⎺⎺⎻──⎼⎽⎽▁       .\
-                        .                     ▔▔⎺⎻⎻─⎼⎼\
+                        .                            .\
+                        ▔⎺⎺⎻⎻─⎼⎼⎽⎽▁                  .\
+                        .          ▔▔⎺⎺⎻──⎼⎼⎽▁▁      .\
+                        .                      ▔▔⎺⎻⎻──\
                         . 100                     1000\
                         ⍺  ⒊1            ⏂         100\
                         g  ⒈1                        .\

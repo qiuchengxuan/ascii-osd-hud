@@ -1,15 +1,15 @@
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
-use crate::AspectRatio;
+use crate::{AspectRatio, PixelRatio};
 #[allow(unused)] // false warning
 use micromath::F32Ext;
 
 pub struct Pitchladder {
     horizental_symbols: [SymbolIndex; 7],
     vertical_symbols: [SymbolIndex; 5],
+    char_pixel_ratio: PixelRatio,
     fov_height: isize,
-    aspect_ratio: f32,
 }
 
 const DEGREE_PER_RAD: f32 = 180.0 / core::f32::consts::PI;
@@ -17,12 +17,17 @@ const DEGREE_PER_RAD: f32 = 180.0 / core::f32::consts::PI;
 type Point = (isize, isize);
 
 impl Pitchladder {
-    pub fn new(symbol_table: &SymbolTable, fov: u8, aspect_ratio: AspectRatio) -> Self {
+    pub fn new(
+        symbol_table: &SymbolTable,
+        fov: u8,
+        char_pixel_ratio: PixelRatio,
+        aspect_ratio: AspectRatio,
+    ) -> Self {
         let mut ladder = Self {
             horizental_symbols: [0; 7],
             vertical_symbols: [0; 5],
+            char_pixel_ratio,
             fov_height: aspect_ratio.diagonal_to_height(fov.into()) as isize,
-            aspect_ratio: aspect_ratio.into(),
         };
         let slice = &symbol_table.as_slice();
         let symbols = &slice[Symbol::LineTop as usize..Symbol::LineBottom as usize + 1];
@@ -76,7 +81,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
         };
         let pitch = -telemetry.attitude.pitch as isize;
 
-        let ratio = self.aspect_ratio / (width as f32 / height as f32);
+        let ratio = self.char_pixel_ratio;
+        let ratio = (ratio.0 as isize * width) as f32 / (ratio.1 as isize * height) as f32;
         let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() / ratio * 1000.0) as isize; // y / x
 
         if -70 <= roll && roll <= 70 {
@@ -118,14 +124,17 @@ mod test {
     use crate::symbol::default_symbol_table;
     use crate::telemetry::Telemetry;
     use crate::test_utils::{fill_edge, to_utf8_string};
-    use crate::AspectRatio;
+    use crate::{AspectRatio, PixelRatio};
 
     use super::Pitchladder;
+
+    const PX_RATIO: PixelRatio = pixel_ratio!(9:32);
+    const ASPECT_RATIO: AspectRatio = aspect_ratio!(32:9);
 
     #[test]
     fn test_horizental() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 150, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 150, PX_RATIO, ASPECT_RATIO);
         let telemetry = Telemetry::default();
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
@@ -144,7 +153,7 @@ mod test {
     #[test]
     fn test_pitch() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 150, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 150, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.pitch = 7;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -164,7 +173,7 @@ mod test {
     #[test]
     fn test_shallow_roll_left() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -15;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -184,7 +193,7 @@ mod test {
     #[test]
     fn test_shallow_roll_right() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 15;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -204,7 +213,7 @@ mod test {
     #[test]
     fn test_roll_left() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -30;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -224,7 +233,7 @@ mod test {
     #[test]
     fn test_roll_right() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 45;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -244,7 +253,7 @@ mod test {
     #[test]
     fn test_deep_roll_left() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = -80;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -264,7 +273,7 @@ mod test {
     #[test]
     fn test_roll_more_than_70_with_pitch() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 71;
         telemetry.attitude.pitch = 10;
@@ -285,7 +294,7 @@ mod test {
     #[test]
     fn test_vertical() {
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         let mut telemetry = Telemetry::default();
         telemetry.attitude.roll = 90;
         pitch_ladder.draw(&telemetry, &mut buffer);
@@ -306,7 +315,7 @@ mod test {
     fn test_ranges() {
         let mut telemetry = Telemetry::default();
         let mut buffer = [[0u8; 32]; 9];
-        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, aspect_ratio!(32:9));
+        let pitch_ladder = Pitchladder::new(&default_symbol_table(), 18, PX_RATIO, ASPECT_RATIO);
         for i in 0..180 {
             telemetry.attitude.roll = i as i16;
             pitch_ladder.draw(&telemetry, &mut buffer);
