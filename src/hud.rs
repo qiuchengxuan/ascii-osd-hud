@@ -79,6 +79,7 @@ impl<'a> HUD<'a> {
         pixel_ratio: PixelRatio,
         aspect_ratio: AspectRatio,
     ) -> HUD<'a> {
+        let fov = core::cmp::max(10, fov); // avoid divide zero
         HUD {
             altitude: Altitude::default(),
             aoa: AOA::new(&symbols),
