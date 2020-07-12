@@ -5,14 +5,14 @@ use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 use crate::AspectRatio;
 
-pub struct WaypointVector {
+pub struct SteerpointVector {
     vector: SymbolIndex,
     fov_width: u8,
     fov_height: u8,
     counter: Cell<u8>,
 }
 
-impl WaypointVector {
+impl SteerpointVector {
     pub fn new(symbols: &SymbolTable, fov: u8, aspect_ratio: AspectRatio) -> Self {
         Self {
             vector: symbols[Symbol::Square],
@@ -23,14 +23,14 @@ impl WaypointVector {
     }
 }
 
-impl<T: AsMut<[u8]>> Drawable<T> for WaypointVector {
+impl<T: AsMut<[u8]>> Drawable<T> for SteerpointVector {
     fn align(&self) -> Align {
         Align::Center
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        let waypoint = &telemetry.waypoint.coordinate;
-        let phi = -waypoint.phi as isize;
+        let steerpoint = &telemetry.steerpoint.coordinate;
+        let phi = -steerpoint.phi as isize;
         let height = output.len() as isize;
         let mut y = phi * height / self.fov_height as isize + height / 2;
         if y < 0 {
@@ -41,11 +41,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for WaypointVector {
         let buffer = output[y as usize].as_mut();
         let width = buffer.len() as isize;
 
-        let mut theta = waypoint.theta as isize;
-        if theta > 180 {
-            theta = theta - 360;
-        }
-        let mut x = theta * width / self.fov_width as isize + width / 2;
+        let azimuth = steerpoint.theta as isize;
+        let mut x = azimuth * width / self.fov_width as isize + width / 2;
         if x < 0 {
             x = 0;
         } else if x >= width {
@@ -68,16 +65,17 @@ mod test {
     use crate::test_utils::{fill_edge, to_utf8_string, ZeroSlice};
     use crate::AspectRatio;
 
-    use super::WaypointVector;
+    use super::SteerpointVector;
 
     #[test]
-    fn test_waypoint_vector() {
+    fn test_steerpoint_vector() {
         let mut buffer = [[0u8; 32]; 9];
-        let waypoint_vector = WaypointVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let steerpoint_vector =
+            SteerpointVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
         let mut telemetry = Telemetry::default();
-        telemetry.waypoint.coordinate.theta = 1;
-        telemetry.waypoint.coordinate.phi = -1;
-        waypoint_vector.draw(&telemetry, &mut buffer);
+        telemetry.steerpoint.coordinate.theta = 1;
+        telemetry.steerpoint.coordinate.phi = -1;
+        steerpoint_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
@@ -91,8 +89,8 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.waypoint.coordinate.phi = 1;
-        waypoint_vector.draw(&telemetry, &mut buffer);
+        telemetry.steerpoint.coordinate.phi = 1;
+        steerpoint_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
@@ -106,9 +104,9 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.waypoint.coordinate.theta = 45;
-        telemetry.waypoint.coordinate.phi = -45;
-        waypoint_vector.draw(&telemetry, &mut buffer);
+        telemetry.steerpoint.coordinate.theta = 45;
+        telemetry.steerpoint.coordinate.phi = -45;
+        steerpoint_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\

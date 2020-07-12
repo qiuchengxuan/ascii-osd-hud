@@ -1,5 +1,5 @@
 use core::cell::Cell;
-use core::cmp::min;
+use core::cmp::{max, min};
 
 use numtoa::NumToA;
 
@@ -8,26 +8,25 @@ use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 
 const HEADING_TAPE_WIDTH: usize = 3 * 5; // e.g. "350 . 000 . 010"
-const MAX_OFFSET: usize = HEADING_TAPE_WIDTH / 2;
+const MAX_OFFSET: isize = HEADING_TAPE_WIDTH as isize / 2;
 
 #[inline]
-fn degree_to_offset(degree: u16) -> usize {
-    degree as usize * 3 / 5
+fn degree_to_offset(degree: i16) -> isize {
+    degree as isize * 3 / 5
 }
 
-fn theta_to_offset(theta: u16) -> usize {
-    if theta < 180 {
-        let offset = min(degree_to_offset(theta), MAX_OFFSET);
-        MAX_OFFSET + offset
+fn theta_to_offset(theta: i16) -> usize {
+    let offset = if theta >= 0 {
+        min(degree_to_offset(theta), MAX_OFFSET)
     } else {
-        let offset = min(degree_to_offset(360 - theta), MAX_OFFSET);
-        MAX_OFFSET - offset
-    }
+        max(degree_to_offset(theta), -MAX_OFFSET)
+    };
+    (MAX_OFFSET + offset) as usize
 }
 
 pub struct HeadingTape {
     align: Align, // only accept Top or Bottom
-    waypoint_indicator: SymbolIndex,
+    steerpoint_indicator: SymbolIndex,
     counter: Cell<usize>,
 }
 
@@ -35,19 +34,19 @@ impl HeadingTape {
     pub fn new(symbols: &SymbolTable) -> Self {
         Self {
             align: Align::Top,
-            waypoint_indicator: symbols[Symbol::BoxDrawningLightUp],
+            steerpoint_indicator: symbols[Symbol::BoxDrawningLightUp],
             counter: Cell::new(0),
         }
     }
 
-    fn draw_indicator(&self, wp_theta: u16, output: &mut [u8]) {
+    fn draw_indicator(&self, wp_theta: i16, output: &mut [u8]) {
         let center = output.len() / 2;
         let wp_offset = theta_to_offset(wp_theta) + center - HEADING_TAPE_WIDTH / 2;
         if self.counter.get() % 2 == 0 || wp_offset != center {
             output[center] = '^' as u8;
         }
         if self.counter.get() % 2 == 1 || wp_offset != center {
-            output[wp_offset] = self.waypoint_indicator;
+            output[wp_offset] = self.steerpoint_indicator;
         }
     }
 }
@@ -69,8 +68,11 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
         } else {
             index -= 1
         };
-        let wp_theta = telemetry.waypoint.coordinate.theta;
-        self.draw_indicator(wp_theta, output[index].as_mut());
+        let mut theta = ((telemetry.steerpoint.heading + 360 - telemetry.heading) % 360) as i16;
+        if theta > 180 {
+            theta = theta - 360
+        }
+        self.draw_indicator(theta, output[index].as_mut());
         self.counter.set(self.counter.get() + 1);
         2
     }
@@ -88,7 +90,7 @@ fn draw_tape(heading: u16, output: &mut [u8]) {
     let lower_heading = heading / 10 * 10;
     let upper_heading = lower_heading + 10;
     let center = HEADING_TAPE_WIDTH / 2 + 2;
-    let delta = degree_to_offset(heading - lower_heading);
+    let delta = degree_to_offset((heading - lower_heading) as i16);
     let lower_index = center - 1 - delta as usize;
 
     draw_heading(&mut buffer[lower_index..], lower_heading);
@@ -148,22 +150,27 @@ mod test {
     }
 
     #[test]
-    fn test_waypoint() {
+    fn test_steerpoint() {
         let mut buffer = [[0u8; HEADING_TAPE_WIDTH + 2]; 2];
         let tape = HeadingTape::new(&default_symbol_table());
         let mut telemetry = Telemetry::default();
-        telemetry.waypoint.coordinate.theta = 90;
+        telemetry.steerpoint.heading = 0;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" 350 . 000 . 010 ", to_utf8_string(&buffer[0..1]));
+        assert_eq!("        ^        ", to_utf8_string(&buffer[1..2]));
+
+        buffer[1].zero();
+        telemetry.steerpoint.heading = 90;
+        tape.draw(&telemetry, &mut buffer);
         assert_eq!("        ^      ╵ ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].zero();
-        telemetry.waypoint.coordinate.theta = 180;
+        telemetry.steerpoint.heading = 180;
         tape.draw(&telemetry, &mut buffer);
-        assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));
+        assert_eq!("        ^      ╵ ", to_utf8_string(&buffer[1..2]));
 
         buffer[1].zero();
-        telemetry.waypoint.coordinate.theta = 270;
+        telemetry.steerpoint.heading = 270;
         tape.draw(&telemetry, &mut buffer);
         assert_eq!(" ╵      ^        ", to_utf8_string(&buffer[1..2]));
     }

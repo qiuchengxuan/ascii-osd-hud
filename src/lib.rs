@@ -62,14 +62,14 @@ pub mod hud;
 mod pitch_ladder;
 mod rssi;
 mod speed;
+mod steerpoint;
+mod steerpoint_vector;
 pub mod symbol;
 pub mod telemetry;
 #[cfg(test)]
 mod test_utils;
+mod velocity;
 mod velocity_vector;
-mod vertial_speed;
-mod waypoint;
-mod waypoint_vector;
 
 extern crate micromath;
 

@@ -2,7 +2,7 @@ use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 use crate::{AspectRatio, PixelRatio};
-#[allow(unused)] // false warning
+#[allow(unused_imports)] // false warning
 use micromath::F32Ext;
 
 pub struct Pitchladder {

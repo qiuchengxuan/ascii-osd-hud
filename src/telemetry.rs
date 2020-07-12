@@ -13,8 +13,8 @@ impl Default for Attitude {
 #[derive(Copy, Clone, Debug)]
 pub struct SphericalCoordinate {
     pub rho: u16,   // ρ or radius
-    pub theta: u16, // θ, 0 <= θ < 360, azimuthal angle
-    pub phi: i16,   // φ, -90 <= φ <= 90, polar angle, negative means desend
+    pub theta: i16, // θ, -180 <= θ <= 180, azimuthal angle
+    pub phi: i8,    // φ, -90 <= φ <= 90, polar angle, negative means desend
 }
 
 impl Default for SphericalCoordinate {
@@ -28,20 +28,22 @@ impl Default for SphericalCoordinate {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct Waypoint {
+pub struct Steerpoint {
     pub number: u8,                      // e.g. 0 means home or base
-    pub name: [u8; 4],                   // e.g. "HOME" when number = 0
+    pub name: &'static str,              // e.g. "HOME" when number = 0
+    pub heading: u16,                    //
     pub coordinate: SphericalCoordinate, // rho unit km or nm * 10
-    pub unit: [u8; 2],                   // KM or NM
+    pub unit: &'static str,              // KM or NM
 }
 
-impl Default for Waypoint {
+impl Default for Steerpoint {
     fn default() -> Self {
         Self {
             number: 0,
-            name: *b"HOME",
+            name: "HOME",
+            heading: 0,
             coordinate: SphericalCoordinate::default(),
-            unit: *b"NM",
+            unit: "NM",
         }
     }
 }
@@ -58,8 +60,8 @@ pub struct Telemetry {
     pub height: i16,                          // feets or meters, same with altitude
     pub rssi: u8,                             // percentage
     pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
-    pub vertical_speed: i16,                  // feets/min or m/s
-    pub waypoint: Waypoint,                   //
+    pub velocity: i16,                        // feets/min or m/s
+    pub steerpoint: Steerpoint,               //
 }
 
 impl<'a> Default for Telemetry {
@@ -75,8 +77,8 @@ impl<'a> Default for Telemetry {
             height: 0,
             rssi: 0,
             velocity_vector: SphericalCoordinate::default(),
-            vertical_speed: 0,
-            waypoint: Waypoint::default(),
+            velocity: 0,
+            steerpoint: Steerpoint::default(),
         }
     }
 }
@@ -87,7 +89,7 @@ impl Telemetry {
     }
 
     pub fn time_to_go(&self) -> u32 {
-        let rho = self.waypoint.coordinate.rho;
+        let rho = self.steerpoint.coordinate.rho;
         let speed = self.velocity_vector.rho;
         if rho > 0 && speed > 0 {
             return rho as u32 * 3600 / 10 / speed as u32; // rho / 10 / (speed / 3600)

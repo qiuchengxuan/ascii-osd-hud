@@ -48,11 +48,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
         let buffer = output[y as usize].as_mut();
         let width = buffer.len() as isize;
 
-        let mut heading = telemetry.velocity_vector.theta as isize;
-        if heading > 180 {
-            heading = heading - 360;
-        }
-        let x_degree = with_ratio(speed, heading);
+        let azimuth = telemetry.velocity_vector.theta as isize;
+        let x_degree = with_ratio(speed, azimuth);
         let mut x = x_degree * width / self.fov_width as isize + width / 2;
         if x < 0 {
             x = 0;

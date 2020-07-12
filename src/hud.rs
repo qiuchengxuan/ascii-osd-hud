@@ -11,12 +11,12 @@ use crate::height::Height;
 use crate::pitch_ladder::Pitchladder;
 use crate::rssi::RSSI;
 use crate::speed::Speed;
+use crate::steerpoint::Steerpoint;
+use crate::steerpoint_vector::SteerpointVector;
 use crate::symbol::SymbolTable;
 use crate::telemetry::TelemetrySource;
+use crate::velocity::Velocity;
 use crate::velocity_vector::VelocityVector;
-use crate::vertial_speed::VerticalSpeed;
-use crate::waypoint::Waypoint;
-use crate::waypoint_vector::WaypointVector;
 use crate::{AspectRatio, PixelRatio};
 
 #[derive(Enum)]
@@ -26,7 +26,7 @@ pub enum Displayable {
 
     // Center
     VelocityVector,
-    WaypointVector,
+    SteerpointVector,
 
     // TopLeft
     RSSI,
@@ -45,10 +45,10 @@ pub enum Displayable {
 
     // Right
     Altitude,
-    VerticalSpeed,
+    Velocity,
 
     // BottomRight
-    Waypoint,
+    Steerpoint,
     Height,
 }
 
@@ -63,10 +63,10 @@ pub struct HUD<'a> {
     pitch_ladder: Pitchladder,
     rssi: RSSI,
     speed: Speed,
-    vertial_speed: VerticalSpeed,
+    vertial_speed: Velocity,
     velocity_vector: VelocityVector,
-    waypoint: Waypoint,
-    waypoint_vector: WaypointVector,
+    steerpoint: Steerpoint,
+    steerpoint_vector: SteerpointVector,
     aligns: EnumMap<Displayable, Option<Align>>,
     telemetry_source: &'a dyn TelemetrySource,
 }
@@ -91,10 +91,10 @@ impl<'a> HUD<'a> {
             pitch_ladder: Pitchladder::new(&symbols, fov, pixel_ratio, aspect_ratio),
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
-            vertial_speed: VerticalSpeed::default(),
+            vertial_speed: Velocity::default(),
             velocity_vector: VelocityVector::new(&symbols, fov, aspect_ratio),
-            waypoint_vector: WaypointVector::new(&symbols, fov, aspect_ratio),
-            waypoint: Waypoint::new(&symbols),
+            steerpoint_vector: SteerpointVector::new(&symbols, fov, aspect_ratio),
+            steerpoint: Steerpoint::new(&symbols),
             aligns: enum_map! {
                 Displayable::Altitude => Some(Align::Right),
                 Displayable::AOA => Some(Align::Left),
@@ -106,10 +106,10 @@ impl<'a> HUD<'a> {
                 Displayable::Pitchladder => Some(Align::Bottom),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
-                Displayable::VerticalSpeed => Some(Align::Right),
+                Displayable::Velocity => Some(Align::Right),
                 Displayable::VelocityVector => Some(Align::Center),
-                Displayable::Waypoint => Some(Align::BottomRight),
-                Displayable::WaypointVector => Some(Align::Center),
+                Displayable::Steerpoint => Some(Align::BottomRight),
+                Displayable::SteerpointVector => Some(Align::Center),
             },
             telemetry_source: source,
         }
@@ -127,10 +127,10 @@ impl<'a> HUD<'a> {
             Displayable::Pitchladder => &self.pitch_ladder,
             Displayable::RSSI => &self.rssi,
             Displayable::Speed => &self.speed,
-            Displayable::VerticalSpeed => &self.vertial_speed,
+            Displayable::Velocity => &self.vertial_speed,
             Displayable::VelocityVector => &self.velocity_vector,
-            Displayable::Waypoint => &self.waypoint,
-            Displayable::WaypointVector => &self.waypoint_vector,
+            Displayable::Steerpoint => &self.steerpoint,
+            Displayable::SteerpointVector => &self.steerpoint_vector,
         }
     }
 
@@ -170,7 +170,7 @@ impl<'a> HUD<'a> {
 #[cfg(test)]
 mod test {
     use crate::symbol::default_symbol_table;
-    use crate::telemetry::{Attitude, SphericalCoordinate, Telemetry, TelemetrySource, Waypoint};
+    use crate::telemetry::{Attitude, SphericalCoordinate, Steerpoint, Telemetry, TelemetrySource};
     use crate::test_utils::{fill_edge, to_utf8_string};
     use crate::{AspectRatio, PixelRatio};
 
@@ -191,16 +191,16 @@ mod test {
                 g_force: 11,
                 height: 99,
                 rssi: 100,
-                vertical_speed: 100,
+                velocity: 100,
                 velocity_vector: SphericalCoordinate {
                     rho: 100, // speed
                     theta: 10,
                     phi: -5,
                 },
-                waypoint: Waypoint {
+                steerpoint: Steerpoint {
                     coordinate: SphericalCoordinate {
                         rho: 47,
-                        theta: 350,
+                        theta: -10,
                         phi: -14,
                     },
                     ..Default::default()
