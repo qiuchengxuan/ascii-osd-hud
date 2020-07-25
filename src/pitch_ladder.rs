@@ -83,7 +83,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
 
         let ratio = self.char_pixel_ratio;
         let ratio = (ratio.0 as isize * width) as f32 / (ratio.1 as isize * height) as f32;
-        let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() / ratio * 1000.0) as isize; // y / x
+        let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() * ratio * 1000.0) as isize; // y / x
 
         if -70 <= roll && roll <= 70 {
             let symbols = &self.horizental_symbols;
@@ -128,8 +128,8 @@ mod test {
 
     use super::Pitchladder;
 
-    const PX_RATIO: PixelRatio = pixel_ratio!(9:32);
-    const ASPECT_RATIO: AspectRatio = aspect_ratio!(32:9);
+    const PX_RATIO: PixelRatio = pixel_ratio!(10:22);
+    const ASPECT_RATIO: AspectRatio = aspect_ratio!(16:10);
 
     #[test]
     fn test_horizental() {
@@ -180,11 +180,11 @@ mod test {
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
-                        .                              .\
-                        .                      ▁▁⎽⎽⎼⎼──⎻\
-                        .        ▁▁⎽⎽⎼⎼──⎻⎻⎺⎺▔▔        .\
-                        ⎼──⎻⎻⎺⎺▔▔                      .\
-                        .                              .\
+                        .                            ▁▁⎽\
+                        .                    ▁⎽⎼──⎻⎺▔  .\
+                        .           ▁⎽⎽⎼─⎻⎺⎺▔          .\
+                        .   ▁⎽⎼─⎻⎻⎺▔                   .\
+                        ⎻⎺▔▔                           .\
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
@@ -200,11 +200,11 @@ mod test {
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
-                        .                              .\
-                        ⎻──⎼⎼⎽⎽▁▁                      .\
-                        .        ▔▔⎺⎺⎻⎻──⎼⎼⎽⎽▁▁        .\
-                        .                      ▔▔⎺⎺⎻⎻──⎼\
-                        .                              .\
+                        ⎼⎽▁▁                           .\
+                        .   ▔⎺⎻─⎼⎼⎽▁                   .\
+                        .           ▔⎺⎺⎻─⎼⎽⎽▁          .\
+                        .                    ▔⎺⎻──⎼⎽▁  .\
+                        .                            ▔▔⎺\
                         .                              .\
                         .                              .";
         assert_eq!(expected, to_utf8_string(&buffer));
@@ -218,15 +218,15 @@ mod test {
         telemetry.attitude.roll = -30;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = ".                              .\
-                        .                              .\
-                        .                         ▁⎽⎼─⎻⎺\
-                        .                   ▁⎽⎼─⎺▔     .\
-                        .            ▁⎽⎼─⎻⎺▔           .\
-                        .      ▁⎼─⎻⎺▔                  .\
-                        ▁⎽⎼─⎻⎺▔                        .\
-                        .                              .\
-                        .                              .";
+        let expected = ".                             ▁⎼\
+                        .                         ▁⎼─⎺▔.\
+                        .                     ▁⎼─⎺▔    .\
+                        .                 ▁⎼─⎺▔        .\
+                        .             ▁⎼─⎺▔            .\
+                        .         ▁⎼─⎺▔                .\
+                        .     ▁⎼─⎺▔                    .\
+                        . ▁⎼─⎺▔                        .\
+                        ─⎺▔                            .";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 
@@ -238,15 +238,15 @@ mod test {
         telemetry.attitude.roll = 45;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = "▔⎻⎼▁                           .\
-                        .   ⎺─⎽▁                       .\
-                        .      ▔⎻⎼▁                    .\
-                        .          ⎺─⎽▁                .\
-                        .             ▔⎻─⎽▁            .\
-                        .                 ▔⎻⎼▁         .\
-                        .                     ⎺─⎽▁     .\
-                        .                        ▔⎻⎼▁  .\
-                        .                            ⎺─⎽";
+        let expected = ".   ⎼▔⎺⎼▁                      .\
+                        .       ▔─▁                    .\
+                        .          ⎻▁                  .\
+                        .            ⎻⎽▁               .\
+                        .              ⎺⎼▁             .\
+                        .                ▔─▁           .\
+                        .                   ─▁         .\
+                        .                     ⎻⎽▁      .\
+                        .                       ⎺⎼▁    .";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 
@@ -258,7 +258,7 @@ mod test {
         telemetry.attitude.roll = -80;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = ".                ▏             .\
+        let expected = ".               ⎪              .\
                         .               ⎪              .\
                         .               ⎪              .\
                         .               |              .\
@@ -266,7 +266,7 @@ mod test {
                         .               |              .\
                         .               ▏              .\
                         .               ▏              .\
-                        .              ⎪               .";
+                        .               ▏              .";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 
@@ -279,15 +279,15 @@ mod test {
         telemetry.attitude.pitch = 10;
         pitch_ladder.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
-        let expected = ".                |             .\
+        let expected = ".                ▏             .\
+                        .                ▏             .\
+                        .                |             .\
+                        .                ⎪             .\
                         .                ⎪             .\
                         .                 ▏            .\
+                        .                 ▏            .\
                         .                 |            .\
-                        .                 ⎪            .\
-                        .                  ▏           .\
-                        .                  |           .\
-                        .                  ⎪           .\
-                        .                   ▏          .";
+                        .                 ⎪            .";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 
