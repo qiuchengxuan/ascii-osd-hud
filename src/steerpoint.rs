@@ -46,7 +46,8 @@ impl<T: AsMut<[u8]>> Drawable<T> for Steerpoint {
         } else {
             (steerpoint.coordinate.rho / 10).numtoa(10, &mut buffer[..buffer_len - 2]);
         }
-        let bytes = steerpoint.unit.as_bytes();
+
+        let bytes = telemetry.unit.distance().as_bytes();
         let copy_size = core::cmp::min(bytes.len(), 2);
         buffer[buffer_len - 2..buffer_len - 2 + copy_size].copy_from_slice(&bytes[..copy_size]);
 

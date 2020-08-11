@@ -28,62 +28,91 @@ impl Default for SphericalCoordinate {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct Steerpoint {
-    pub number: u8,                      // e.g. 0 means home or base
-    pub name: &'static str,              // e.g. "HOME" when number = 0
-    pub heading: u16,                    //
-    pub coordinate: SphericalCoordinate, // rho unit km or nm * 10
-    pub unit: &'static str,              // KM or NM
+pub enum Unit {
+    Aviation,
+    Metric,
 }
 
-impl Default for Steerpoint {
+impl Unit {
+    pub fn distance(self) -> &'static str {
+        match self {
+            Self::Aviation => "NM",
+            Self::Metric => "KM",
+        }
+    }
+
+    pub fn elevation(self) -> &'static str {
+        match self {
+            Self::Aviation => "FT",
+            Self::Metric => "M",
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct Steerpoint<'a> {
+    pub number: u8,                      // e.g. 0 means home or base
+    pub name: &'a str,                   // e.g. "HOME" when number = 0
+    pub heading: u16,                    //
+    pub coordinate: SphericalCoordinate, // rho unit km or nm * 10
+}
+
+impl<'a> Default for Steerpoint<'a> {
     fn default() -> Self {
         Self {
             number: 0,
             name: "HOME",
             heading: 0,
             coordinate: SphericalCoordinate::default(),
-            unit: "NM",
         }
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct Telemetry {
-    pub altitude: i16,                        // feets or meters
-    pub aoa: u8,                              // in degree*10
-    pub attitude: Attitude,                   // in degree
-    pub heading: u16,                         // [0, 360), ref to north
-    pub battery: u8,                          // percentage
-    pub flight_mode: [u8; 4],                 //
-    pub g_force: u8,                          // in g*10
-    pub height: i16,                          // feets or meters, same with altitude
-    pub rssi: u8,                             // percentage
-    pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
-    pub velocity: i16,                        // feets/min or m/s
-    pub steerpoint: Steerpoint,               //
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Notes<'a> {
+    pub left: &'a str,
+    pub center: &'a str,
+    pub right: &'a str,
 }
 
-impl<'a> Default for Telemetry {
-    fn default() -> Telemetry {
+#[derive(Copy, Clone, Debug)]
+pub struct Telemetry<'a> {
+    pub altitude: i16,      // feets or meters
+    pub aoa: u8,            // in degree*10
+    pub attitude: Attitude, // in degree
+    pub heading: u16,       // [0, 360), ref to north
+    pub battery: u8,        // percentage
+    pub g_force: u8,        // in g*10
+    pub height: i16,        // feets or meters, same with altitude
+    pub notes: Notes<'a>,   //
+    pub rssi: u8,           // percentage
+    pub unit: Unit,
+    pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
+    pub velocity: i16,                        // feets/min or m/s
+    pub steerpoint: Steerpoint<'a>,           //
+}
+
+impl<'a> Default for Telemetry<'a> {
+    fn default() -> Telemetry<'a> {
         Telemetry {
             altitude: 0,
             attitude: Attitude::default(),
             heading: 0,
             aoa: 0,
             battery: 100,
-            flight_mode: *b"MAN ",
             g_force: 0,
             height: 0,
+            notes: Default::default(),
             rssi: 0,
+            steerpoint: Steerpoint::default(),
+            unit: Unit::Aviation,
             velocity_vector: SphericalCoordinate::default(),
             velocity: 0,
-            steerpoint: Steerpoint::default(),
         }
     }
 }
 
-impl Telemetry {
+impl<'a> Telemetry<'a> {
     pub fn speed(&self) -> u16 {
         self.velocity_vector.rho
     }
@@ -96,8 +125,4 @@ impl Telemetry {
         }
         0
     }
-}
-
-pub trait TelemetrySource {
-    fn get_telemetry(&self) -> Telemetry;
 }
