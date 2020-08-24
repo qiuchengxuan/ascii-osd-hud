@@ -85,12 +85,12 @@ mod test {
         assert_eq!("    0/HOME      60NM  00:00:00", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.velocity_vector.rho = 60;
+        telemetry.speed_vector.rho = 60;
         steerpoint.draw(&telemetry, &mut buffer);
         assert_eq!("    0/HOME      60NM  01:00:00", to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.velocity_vector.rho = 61;
+        telemetry.speed_vector.rho = 61;
         steerpoint.draw(&telemetry, &mut buffer);
         assert_eq!("    0/HOME      60NM  00:59:00", to_utf8_string(&buffer));
 

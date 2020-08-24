@@ -87,9 +87,9 @@ pub struct Telemetry<'a> {
     pub notes: Notes<'a>,   //
     pub rssi: u8,           // percentage
     pub unit: Unit,
-    pub velocity_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
-    pub velocity: i16,                        // feets/min or m/s
-    pub steerpoint: Steerpoint<'a>,           //
+    pub speed_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
+    pub vario: i16,                        // feets/min or m/s
+    pub steerpoint: Steerpoint<'a>,        //
 }
 
 impl<'a> Default for Telemetry<'a> {
@@ -106,20 +106,20 @@ impl<'a> Default for Telemetry<'a> {
             rssi: 0,
             steerpoint: Steerpoint::default(),
             unit: Unit::Aviation,
-            velocity_vector: SphericalCoordinate::default(),
-            velocity: 0,
+            speed_vector: SphericalCoordinate::default(),
+            vario: 0,
         }
     }
 }
 
 impl<'a> Telemetry<'a> {
     pub fn speed(&self) -> u16 {
-        self.velocity_vector.rho
+        self.speed_vector.rho
     }
 
     pub fn time_to_go(&self) -> u32 {
         let rho = self.steerpoint.coordinate.rho;
-        let speed = self.velocity_vector.rho;
+        let speed = self.speed_vector.rho;
         if rho > 0 && speed > 0 {
             return rho as u32 * 3600 / 10 / speed as u32; // rho / 10 / (speed / 3600)
         }

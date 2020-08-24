@@ -34,7 +34,7 @@ mod test {
         let mut buffer = [[0u8; 6]];
         let altitude = Speed::default();
         let mut telemetry = Telemetry::default();
-        telemetry.velocity_vector.rho = 100;
+        telemetry.speed_vector.rho = 100;
         altitude.draw(&telemetry, &mut buffer);
         assert_eq!("  100 ", to_utf8_string(&buffer));
     }

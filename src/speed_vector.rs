@@ -5,14 +5,14 @@ use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
 use crate::telemetry::Telemetry;
 use crate::AspectRatio;
 
-pub struct VelocityVector {
+pub struct SpeedVector {
     vector: SymbolIndex,
     fov_width: u8,
     fov_height: u8,
     counter: Cell<u8>,
 }
 
-impl VelocityVector {
+impl SpeedVector {
     pub fn new(symbols: &SymbolTable, fov: u8, aspect_ratio: AspectRatio) -> Self {
         Self {
             vector: symbols[Symbol::VeclocityVector],
@@ -30,7 +30,7 @@ fn with_ratio(speed: isize, degree: isize) -> isize {
     degree * speed * speed / 5 / 5
 }
 
-impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
+impl<T: AsMut<[u8]>> Drawable<T> for SpeedVector {
     fn align(&self) -> Align {
         Align::Center
     }
@@ -38,7 +38,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let speed = telemetry.speed() as isize;
         let height = output.len() as isize;
-        let y_degree = -with_ratio(speed, telemetry.velocity_vector.phi as isize);
+        let y_degree = -with_ratio(speed, telemetry.speed_vector.phi as isize);
         let mut y = y_degree * height / self.fov_height as isize + height / 2;
         if y < 0 {
             y = 0;
@@ -48,7 +48,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for VelocityVector {
         let buffer = output[y as usize].as_mut();
         let width = buffer.len() as isize;
 
-        let azimuth = telemetry.velocity_vector.theta as isize;
+        let azimuth = telemetry.speed_vector.theta as isize;
         let x_degree = with_ratio(speed, azimuth);
         let mut x = x_degree * width / self.fov_width as isize + width / 2;
         if x < 0 {
@@ -73,16 +73,16 @@ mod test {
     use crate::test_utils::{fill_edge, to_utf8_string, ZeroSlice};
     use crate::AspectRatio;
 
-    use super::VelocityVector;
+    use super::SpeedVector;
 
     #[test]
-    fn test_velocity_vector() {
+    fn test_speed_vector() {
         let mut buffer = [[0u8; 32]; 9];
-        let velocity_vector = VelocityVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
+        let speed_vector = SpeedVector::new(&default_symbol_table(), 18, aspect_ratio!(16:9));
         let mut telemetry = Telemetry::default();
-        telemetry.velocity_vector.theta = 1;
-        telemetry.velocity_vector.phi = -1;
-        velocity_vector.draw(&telemetry, &mut buffer);
+        telemetry.speed_vector.theta = 1;
+        telemetry.speed_vector.phi = -1;
+        speed_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
@@ -96,8 +96,8 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.velocity_vector.rho = 5;
-        velocity_vector.draw(&telemetry, &mut buffer);
+        telemetry.speed_vector.rho = 5;
+        speed_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\
@@ -111,9 +111,9 @@ mod test {
         assert_eq!(expected, to_utf8_string(&buffer));
 
         buffer.iter_mut().for_each(|b| b.zero());
-        telemetry.velocity_vector.theta = 45;
-        telemetry.velocity_vector.phi = -45;
-        velocity_vector.draw(&telemetry, &mut buffer);
+        telemetry.speed_vector.theta = 45;
+        telemetry.speed_vector.phi = -45;
+        speed_vector.draw(&telemetry, &mut buffer);
         fill_edge(&mut buffer);
         let expected = ".                              .\
                         .                              .\

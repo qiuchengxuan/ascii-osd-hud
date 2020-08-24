@@ -11,12 +11,12 @@ use crate::note::note;
 use crate::pitch_ladder::Pitchladder;
 use crate::rssi::RSSI;
 use crate::speed::Speed;
+use crate::speed_vector::SpeedVector;
 use crate::steerpoint::Steerpoint;
 use crate::steerpoint_vector::SteerpointVector;
 use crate::symbol::SymbolTable;
 use crate::telemetry::Telemetry;
-use crate::velocity::Velocity;
-use crate::velocity_vector::VelocityVector;
+use crate::vario::Vario;
 use crate::{AspectRatio, PixelRatio};
 
 #[derive(Enum)]
@@ -25,7 +25,7 @@ pub enum Displayable {
     Pitchladder,
 
     // Center
-    VelocityVector,
+    SpeedVector,
     SteerpointVector,
 
     // TopLeft
@@ -44,7 +44,7 @@ pub enum Displayable {
 
     // Right
     Altitude,
-    Velocity,
+    Vario,
 
     // BottomRight
     Steerpoint,
@@ -61,8 +61,8 @@ pub struct HUD {
     pitch_ladder: Pitchladder,
     rssi: RSSI,
     speed: Speed,
-    vertial_speed: Velocity,
-    velocity_vector: VelocityVector,
+    vario: Vario,
+    speed_vector: SpeedVector,
     steerpoint: Steerpoint,
     steerpoint_vector: SteerpointVector,
     aligns: EnumMap<Displayable, Option<Align>>,
@@ -81,8 +81,8 @@ impl HUD {
             pitch_ladder: Pitchladder::new(&symbols, fov, pixel, aspect),
             rssi: RSSI::new(&symbols),
             speed: Speed::default(),
-            vertial_speed: Velocity::default(),
-            velocity_vector: VelocityVector::new(&symbols, fov, aspect),
+            vario: Vario::default(),
+            speed_vector: SpeedVector::new(&symbols, fov, aspect),
             steerpoint_vector: SteerpointVector::new(&symbols, fov, aspect),
             steerpoint: Steerpoint::new(&symbols),
             aligns: enum_map! {
@@ -95,8 +95,8 @@ impl HUD {
                 Displayable::Pitchladder => Some(Align::Bottom),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
-                Displayable::Velocity => Some(Align::Right),
-                Displayable::VelocityVector => Some(Align::Center),
+                Displayable::Vario => Some(Align::Right),
+                Displayable::SpeedVector => Some(Align::Center),
                 Displayable::Steerpoint => Some(Align::BottomRight),
                 Displayable::SteerpointVector => Some(Align::Center),
             },
@@ -114,8 +114,8 @@ impl HUD {
             Displayable::Pitchladder => &self.pitch_ladder,
             Displayable::RSSI => &self.rssi,
             Displayable::Speed => &self.speed,
-            Displayable::Velocity => &self.vertial_speed,
-            Displayable::VelocityVector => &self.velocity_vector,
+            Displayable::Vario => &self.vario,
+            Displayable::SpeedVector => &self.speed_vector,
             Displayable::Steerpoint => &self.steerpoint,
             Displayable::SteerpointVector => &self.steerpoint_vector,
         }
@@ -190,8 +190,8 @@ mod test {
                 ..Default::default()
             },
             rssi: 100,
-            velocity: 100,
-            velocity_vector: SphericalCoordinate {
+            vario: 100,
+            speed_vector: SphericalCoordinate {
                 rho: 100, // speed
                 theta: 10,
                 phi: -5,

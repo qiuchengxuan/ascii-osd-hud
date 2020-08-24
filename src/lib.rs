@@ -50,6 +50,9 @@ impl AspectRatio {
     }
 }
 
+#[cfg(test)]
+mod test_utils;
+
 mod altitude;
 mod aoa;
 mod battery;
@@ -62,14 +65,12 @@ mod note;
 mod pitch_ladder;
 mod rssi;
 mod speed;
+mod speed_vector;
 mod steerpoint;
 mod steerpoint_vector;
 pub mod symbol;
 pub mod telemetry;
-#[cfg(test)]
-mod test_utils;
-mod velocity;
-mod velocity_vector;
+mod vario;
 
 extern crate micromath;
 
