@@ -26,10 +26,10 @@ pub fn fill_edge<T: AsMut<[u8]>>(buffer: &mut [T]) {
     buffer.iter_mut().for_each(|mutable| {
         let line = mutable.as_mut();
         if *line.last().unwrap() == 0u8 {
-            line[line.len() - 1] = '.' as u8;
+            line[line.len() - 1] = b'.';
         }
         if *line.first().unwrap() == 0u8 {
-            line[0] = '.' as u8;
+            line[0] = b'.';
         }
     });
 }

@@ -1,7 +1,7 @@
 #[derive(Copy, Clone, Debug)]
 pub struct Attitude {
-    pub pitch: i8, // [-90, 90], negative means sink
     pub roll: i16, // [-180, 180], clock wise
+    pub pitch: i8, // [-90, 90], negative means sink
 }
 
 impl Default for Attitude {
@@ -10,7 +10,7 @@ impl Default for Attitude {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct SphericalCoordinate {
     pub rho: u16,   // ρ or radius
     pub theta: i16, // θ, -180 <= θ <= 180, azimuthal angle
@@ -78,7 +78,7 @@ pub struct Notes<'a> {
 #[derive(Copy, Clone, Debug)]
 pub struct Telemetry<'a> {
     pub altitude: i16,      // feets or meters
-    pub aoa: u8,            // in degree*10
+    pub aoa: i8,            // in degree*10
     pub attitude: Attitude, // in degree
     pub heading: u16,       // [0, 360), ref to north
     pub battery: u8,        // percentage

@@ -27,7 +27,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Height {
         let buffer_len = buffer.len();
         let region = &mut buffer[..buffer_len - 1];
         telemetry.height.numtoa(10, region);
-        buffer[buffer_len - 1] = 'R' as u8;
+        buffer[buffer_len - 1] = b'R';
         1
     }
 }

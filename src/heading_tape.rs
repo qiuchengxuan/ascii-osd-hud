@@ -43,7 +43,7 @@ impl HeadingTape {
         let center = output.len() / 2;
         let wp_offset = theta_to_offset(wp_theta) + center - HEADING_TAPE_WIDTH / 2;
         if self.counter.get() % 2 == 0 || wp_offset != center {
-            output[center] = '^' as u8;
+            output[center] = b'^';
         }
         if self.counter.get() % 2 == 1 || wp_offset != center {
             output[wp_offset] = self.steerpoint_indicator;
@@ -86,7 +86,7 @@ fn draw_heading(output: &mut [u8], number: u16) {
 }
 
 fn draw_tape(heading: u16, output: &mut [u8]) {
-    let mut buffer: [u8; HEADING_TAPE_WIDTH + 4] = [' ' as u8; HEADING_TAPE_WIDTH + 4];
+    let mut buffer: [u8; HEADING_TAPE_WIDTH + 4] = [b' '; HEADING_TAPE_WIDTH + 4];
     let lower_heading = heading / 10 * 10;
     let upper_heading = lower_heading + 10;
     let center = HEADING_TAPE_WIDTH / 2 + 2;
@@ -105,9 +105,9 @@ fn draw_tape(heading: u16, output: &mut [u8]) {
     if upper_index + 6 < 2 + HEADING_TAPE_WIDTH {
         draw_heading(&mut buffer[upper_index + 6..], (upper_heading + 10) % 360)
     }
-    buffer[lower_index - 2] = '.' as u8;
-    buffer[lower_index + 4] = '.' as u8;
-    buffer[upper_index + 4] = '.' as u8;
+    buffer[lower_index - 2] = b'.';
+    buffer[lower_index + 4] = b'.';
+    buffer[upper_index + 4] = b'.';
     let index = output.len() / 2 - HEADING_TAPE_WIDTH / 2;
     output[index..index + HEADING_TAPE_WIDTH].copy_from_slice(&buffer[2..2 + HEADING_TAPE_WIDTH]);
 }

@@ -27,11 +27,11 @@ pub enum Symbol {
 }
 
 pub fn to_number_with_dot(byte: u8, zero_with_trailling_dot: SymbolIndex) -> u8 {
-    if '0' as u8 <= byte && byte <= '9' as u8 {
-        if zero_with_trailling_dot > '0' as u8 {
-            byte + (zero_with_trailling_dot - '0' as u8)
+    if b'0' <= byte && byte <= b'9' {
+        if zero_with_trailling_dot > b'0' {
+            byte + (zero_with_trailling_dot - b'0')
         } else {
-            byte - ('0' as u8 - zero_with_trailling_dot)
+            byte - (b'0' - zero_with_trailling_dot)
         }
     } else {
         zero_with_trailling_dot

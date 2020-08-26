@@ -25,9 +25,14 @@ impl<T: AsMut<[u8]>> Drawable<T> for AOA {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        telemetry.aoa.numtoa(10, &mut buffer[2..5]);
+        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
+        let aoa = telemetry.aoa;
+        // FIXME: numtoa is buggy to handle i8
+        let bytes = (if aoa > 0 { aoa } else { -aoa } as u8).numtoa(10, &mut buffer[..5]);
+        if aoa < 0 {
+            buffer[5 - core::cmp::max(bytes.len(), 2) - 1] = b'-';
+        }
         buffer[0] = self.alpha;
-        buffer[1..3].iter_mut().for_each(|b| *b = ' ' as u8);
         buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
         1
     }
@@ -52,8 +57,8 @@ mod test {
         assert_eq!("⍺  ⒊1 ", to_utf8_string(&buffer));
 
         buffer[0].iter_mut().for_each(|x| *x = 0);
-        telemetry.aoa = 1;
+        telemetry.aoa = -1;
         aoa.draw(&telemetry, &mut buffer);
-        assert_eq!("⍺  ₀1 ", to_utf8_string(&buffer));
+        assert_eq!("⍺ -₀1 ", to_utf8_string(&buffer));
     }
 }

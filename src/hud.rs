@@ -128,10 +128,10 @@ impl HUD {
     ) -> &'b [B] {
         output.iter_mut().for_each(|line| {
             for x in line.as_mut() {
-                if *x == ' ' as u8 {
+                if *x == b' ' {
                     *x = 0
                 } else if *x > 0 {
-                    *x = ' ' as u8
+                    *x = b' '
                 }
             }
         });

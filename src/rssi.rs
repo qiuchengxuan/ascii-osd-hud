@@ -22,11 +22,10 @@ impl<T: AsMut<[u8]>> Drawable<T> for RSSI {
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        let mut num_buffer: [u8; 5] = [0; 5];
-        let num_str = telemetry.rssi.numtoa(10, &mut num_buffer);
         let buffer = output[0].as_mut();
+        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
+        telemetry.rssi.numtoa(10, &mut buffer[..4]);
         buffer[0] = self.antenna;
-        buffer[1..1 + num_str.len()].copy_from_slice(num_str);
         1
     }
 }

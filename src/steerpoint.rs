@@ -54,7 +54,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Steerpoint {
         // number and name
         let buffer = output[last_index - 2].as_mut();
         steerpoint.number.numtoa(10, &mut buffer[..buffer_len - 5]);
-        buffer[buffer_len - 5] = '/' as u8;
+        buffer[buffer_len - 5] = b'/';
         let bytes = steerpoint.name.as_bytes();
         let copy_size = core::cmp::min(bytes.len(), 4);
         buffer[buffer_len - 4..buffer_len - 4 + copy_size].copy_from_slice(&bytes[..copy_size]);

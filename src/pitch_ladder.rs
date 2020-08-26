@@ -12,8 +12,6 @@ pub struct Pitchladder {
     fov_height: isize,
 }
 
-const DEGREE_PER_RAD: f32 = 180.0 / core::f32::consts::PI;
-
 type Point = (isize, isize);
 
 impl Pitchladder {
@@ -83,7 +81,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Pitchladder {
 
         let ratio = self.char_pixel_ratio;
         let ratio = (ratio.0 as isize * width) as f32 / (ratio.1 as isize * height) as f32;
-        let k1000 = ((roll as f32 / DEGREE_PER_RAD).tan() * ratio * 1000.0) as isize; // y / x
+        let k1000 = ((roll as f32).to_radians().tan() * ratio * 1000.0) as isize; // y / x
 
         if -70 <= roll && roll <= 70 {
             let symbols = &self.horizental_symbols;
