@@ -1,4 +1,5 @@
-use numtoa::NumToA;
+use heapless::consts::U6;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::telemetry::Telemetry;
@@ -25,8 +26,10 @@ impl<T: AsMut<[u8]>> Drawable<T> for Height {
             buffer = output[output.len() - 1].as_mut();
         }
         let buffer_len = buffer.len();
-        let region = &mut buffer[..buffer_len - 1];
-        telemetry.height.numtoa(10, region);
+        let string: String<U6> = telemetry.height.into();
+        let bytes = string.as_bytes();
+        let offset = buffer.len() - 1 - bytes.len();
+        buffer[offset..offset + bytes.len()].copy_from_slice(bytes);
         buffer[buffer_len - 1] = b'R';
         1
     }

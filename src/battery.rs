@@ -1,4 +1,5 @@
-use numtoa::NumToA;
+use heapless::consts::U3;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
@@ -22,12 +23,12 @@ impl<T: AsMut<[u8]>> Drawable<T> for Battery {
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        let mut num_buffer: [u8; 5] = [0; 5];
-        let number = telemetry.battery.numtoa(10, &mut num_buffer);
         let buffer = output[0].as_mut();
-        let buffer_len = buffer.len();
-        buffer[buffer_len - number.len() - 1] = self.battery;
-        buffer[buffer_len - number.len()..].copy_from_slice(number);
+        let string: String<U3> = telemetry.battery.into();
+        let bytes = string.as_bytes();
+        let size = buffer.len();
+        buffer[size - bytes.len() - 1] = self.battery;
+        buffer[size - bytes.len()..].copy_from_slice(bytes);
         1
     }
 }

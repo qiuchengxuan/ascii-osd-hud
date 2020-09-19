@@ -138,10 +138,10 @@ impl HUD {
         let output_len = output.len();
         let mut indexes: EnumMap<Align, usize> = EnumMap::new();
         for (display, align_option) in self.aligns.iter() {
-            if align_option.is_none() {
-                continue;
-            }
-            let align = align_option.unwrap();
+            let align = match align_option {
+                Some(align) => *align,
+                None => continue,
+            };
             let drawable: &dyn Drawable<B> = self.to_drawable(display);
             let region = match align {
                 Align::Top | Align::TopLeft | Align::TopRight => &mut output[indexes[align]..],

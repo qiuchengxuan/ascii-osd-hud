@@ -1,4 +1,5 @@
-use numtoa::NumToA;
+use heapless::consts::U6;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::telemetry::Telemetry;
@@ -18,9 +19,10 @@ impl<T: AsMut<[u8]>> Drawable<T> for Vario {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        let buffer_len = buffer.len();
-        let vario = telemetry.vario;
-        vario.numtoa(10, &mut buffer[buffer_len - 6..]);
+        let string: String<U6> = telemetry.vario.into();
+        let bytes = string.as_bytes();
+        let offset = buffer.len() - bytes.len();
+        buffer[offset..].copy_from_slice(bytes);
         1
     }
 }

@@ -1,7 +1,8 @@
 use core::cell::Cell;
 use core::cmp::{max, min};
 
-use numtoa::NumToA;
+use heapless::consts::U5;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
@@ -78,11 +79,11 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
     }
 }
 
-fn draw_heading(output: &mut [u8], number: u16) {
-    let mut buffer: [u8; 5] = [0; 5];
-    let num_str = number.numtoa(10, &mut buffer);
+fn draw_heading(output: &mut [u8], heading: u16) {
     output[..3].copy_from_slice(b"000");
-    output[(3 - num_str.len())..3].copy_from_slice(num_str);
+    let string: String<U5> = heading.into();
+    let bytes = string.as_bytes();
+    output[(3 - bytes.len())..3].copy_from_slice(bytes);
 }
 
 fn draw_tape(heading: u16, output: &mut [u8]) {

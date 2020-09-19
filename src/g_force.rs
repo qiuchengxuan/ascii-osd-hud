@@ -1,4 +1,7 @@
-use numtoa::NumToA;
+use core::fmt::Write;
+
+use heapless::consts::U5;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{to_number_with_dot, Symbol, SymbolIndex, SymbolTable};
@@ -23,9 +26,9 @@ impl<T: AsMut<[u8]>> Drawable<T> for GForce {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        telemetry.g_force.numtoa(10, &mut buffer[2..5]);
-        buffer[0] = b'g';
-        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
+        let mut string: String<U5> = String::new();
+        write!(string, "g{:4}", telemetry.g_force).ok();
+        buffer[..5].copy_from_slice(string.as_bytes());
         buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
         1
     }

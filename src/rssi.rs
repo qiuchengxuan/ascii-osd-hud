@@ -1,4 +1,5 @@
-use numtoa::NumToA;
+use heapless::consts::U3;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{Symbol, SymbolIndex, SymbolTable};
@@ -23,9 +24,12 @@ impl<T: AsMut<[u8]>> Drawable<T> for RSSI {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
-        telemetry.rssi.numtoa(10, &mut buffer[..4]);
         buffer[0] = self.antenna;
+        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
+        let string: String<U3> = telemetry.rssi.into();
+        let bytes = string.as_bytes();
+        let offset = 4 - bytes.len();
+        buffer[offset..offset + bytes.len()].copy_from_slice(bytes);
         1
     }
 }

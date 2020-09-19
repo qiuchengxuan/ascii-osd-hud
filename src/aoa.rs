@@ -1,4 +1,7 @@
-use numtoa::NumToA;
+use core::fmt::Write;
+
+use heapless::consts::U4;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{to_number_with_dot, Symbol, SymbolIndex, SymbolTable};
@@ -25,14 +28,14 @@ impl<T: AsMut<[u8]>> Drawable<T> for AOA {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        buffer[1..3].iter_mut().for_each(|b| *b = b' ');
-        let aoa = telemetry.aoa;
-        // FIXME: numtoa is buggy to handle i8
-        let bytes = (if aoa > 0 { aoa } else { -aoa } as u8).numtoa(10, &mut buffer[..5]);
-        if aoa < 0 {
-            buffer[5 - core::cmp::max(bytes.len(), 2) - 1] = b'-';
-        }
         buffer[0] = self.alpha;
+        let mut string: String<U4> = String::new();
+        write!(string, "{:4}", telemetry.aoa).ok();
+        let bytes = string.as_bytes();
+        buffer[1..5].copy_from_slice(bytes);
+        if -10 < telemetry.aoa && telemetry.aoa < 0 {
+            buffer[2] = b'-';
+        }
         buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
         1
     }

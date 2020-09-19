@@ -1,4 +1,7 @@
-use numtoa::NumToA;
+use core::fmt::Write;
+
+use heapless::consts::U8;
+use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
 use crate::symbol::{to_number_with_dot, Symbol, SymbolIndex, SymbolTable};
@@ -32,32 +35,31 @@ impl<T: AsMut<[u8]>> Drawable<T> for Steerpoint {
         let hours = (time_to_go / 3600) as u8;
         let minutes = (time_to_go / 60 % 60) as u8;
         let seconds = (time_to_go % 60) as u8;
-        buffer[buffer_len - 8..].copy_from_slice(b"00:00:00");
-        seconds.numtoa(10, buffer);
-        minutes.numtoa(10, &mut buffer[..buffer_len - 3]);
-        hours.numtoa(10, &mut buffer[..buffer_len - 6]);
+        let mut string: String<U8> = String::new();
+        write!(string, "{:02}:{:02}:{:02}", hours, minutes, seconds).ok();
+        buffer[buffer_len - 8..].copy_from_slice(string.as_bytes());
 
         // distance
         let buffer = output[last_index - 1].as_mut();
+        let rho = steerpoint.coordinate.rho;
+        let mut string: String<U8> = String::new();
         if steerpoint.coordinate.rho < 100 {
-            let rho = steerpoint.coordinate.rho;
-            rho.numtoa(10, &mut buffer[..buffer_len - 2]);
+            write!(string, "{}{}", rho, telemetry.unit.distance()).ok();
+            let bytes = string.as_bytes();
+            buffer[buffer_len - bytes.len()..].copy_from_slice(bytes);
             buffer[buffer_len - 4] = to_number_with_dot(buffer[buffer_len - 4], self.zero_dot);
         } else {
-            (steerpoint.coordinate.rho / 10).numtoa(10, &mut buffer[..buffer_len - 2]);
+            write!(string, "{}{}", rho / 10, telemetry.unit.distance()).ok();
+            let bytes = string.as_bytes();
+            buffer[buffer_len - bytes.len()..].copy_from_slice(bytes);
         }
-
-        let bytes = telemetry.unit.distance().as_bytes();
-        let copy_size = core::cmp::min(bytes.len(), 2);
-        buffer[buffer_len - 2..buffer_len - 2 + copy_size].copy_from_slice(&bytes[..copy_size]);
 
         // number and name
         let buffer = output[last_index - 2].as_mut();
-        steerpoint.number.numtoa(10, &mut buffer[..buffer_len - 5]);
-        buffer[buffer_len - 5] = b'/';
-        let bytes = steerpoint.name.as_bytes();
-        let copy_size = core::cmp::min(bytes.len(), 4);
-        buffer[buffer_len - 4..buffer_len - 4 + copy_size].copy_from_slice(&bytes[..copy_size]);
+        let mut string: String<U8> = String::new();
+        write!(string, "{}/{:4}", steerpoint.number, steerpoint.name).ok();
+        let bytes = string.as_bytes();
+        buffer[buffer_len - bytes.len()..].copy_from_slice(bytes);
         3
     }
 }
