@@ -83,7 +83,7 @@ pub struct Telemetry<'a> {
     pub heading: u16,       // [0, 360), ref to north
     pub battery: u8,        // percentage
     pub g_force: u8,        // in g*10
-    pub height: i16,        // feets or meters, same with altitude
+    pub height: i16,        // feets or meters, same with altitude, i16::MIN means N/A
     pub notes: Notes<'a>,   //
     pub rssi: u8,           // percentage
     pub unit: Unit,

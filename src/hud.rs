@@ -91,8 +91,8 @@ impl HUD {
                 Displayable::Battery => Some(Align::TopRight),
                 Displayable::GForce => Some(Align::Left),
                 Displayable::HeadingTape => Some(Align::Top),
-                Displayable::Height => Some(Align::BottomRight),
-                Displayable::Pitchladder => Some(Align::Bottom),
+                Displayable::Height => Some(Align::Bottom),
+                Displayable::Pitchladder => Some(Align::Center),
                 Displayable::RSSI => Some(Align::TopLeft),
                 Displayable::Speed => Some(Align::Left),
                 Displayable::Vario => Some(Align::Right),
@@ -146,6 +146,8 @@ impl HUD {
             let region = match align {
                 Align::Top | Align::TopLeft | Align::TopRight => &mut output[indexes[align]..],
                 Align::Bottom | Align::BottomLeft | Align::BottomRight => {
+                    #[cfg(test)]
+                    println!("{}", indexes[align]);
                     &mut output[..output_len - indexes[align]]
                 }
                 Align::Left | Align::Right => &mut output[output_len / 2 + indexes[align]..],
@@ -230,10 +232,10 @@ mod test {
                         ⍺  ⒊1            ⏂         100\
                         g  ⒈1                        .\
                         MAN          ☐               .\
-                        .                          99R\
+                        .                            .\
                         .                       0/HOME\
                         .                         ⒋7NM\
-                        .                     00:02:49";
+                        .             99      00:02:49";
         assert_eq!(expected, to_utf8_string(&buffer));
     }
 }

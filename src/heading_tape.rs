@@ -26,7 +26,6 @@ fn theta_to_offset(theta: i16) -> usize {
 }
 
 pub struct HeadingTape {
-    align: Align, // only accept Top or Bottom
     steerpoint_indicator: SymbolIndex,
     counter: Cell<usize>,
 }
@@ -34,7 +33,6 @@ pub struct HeadingTape {
 impl HeadingTape {
     pub fn new(symbols: &SymbolTable) -> Self {
         Self {
-            align: Align::Top,
             steerpoint_indicator: symbols[Symbol::BoxDrawningLightUp],
             counter: Cell::new(0),
         }
@@ -54,26 +52,17 @@ impl HeadingTape {
 
 impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
     fn align(&self) -> Align {
-        self.align
+        Align::Top
     }
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
-        let mut index = 0;
-        if self.align == Align::Bottom {
-            index = output.len() - 1;
-        }
-        draw_tape(telemetry.heading, output[index].as_mut());
+        draw_tape(telemetry.heading, output[0].as_mut());
 
-        if self.align == Align::Top {
-            index += 1
-        } else {
-            index -= 1
-        };
         let mut theta = ((telemetry.steerpoint.heading + 360 - telemetry.heading) % 360) as i16;
         if theta > 180 {
             theta = theta - 360
         }
-        self.draw_indicator(theta, output[index].as_mut());
+        self.draw_indicator(theta, output[1].as_mut());
         self.counter.set(self.counter.get() + 1);
         2
     }
