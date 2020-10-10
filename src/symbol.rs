@@ -7,7 +7,6 @@ pub enum Symbol {
     Antenna,
     Battery,
     BoxDrawningLightUp,
-    Degree,
     VeclocityVector,
     Alpha,
     Square,
@@ -42,25 +41,24 @@ pub type SymbolTable = EnumMap<Symbol, SymbolIndex>;
 
 pub fn default_symbol_table() -> SymbolTable {
     enum_map! {
-        Symbol::Antenna => 128,
-        Symbol::Battery => 129,
-        Symbol::Degree => 130,
-        Symbol::VeclocityVector => 131,
-        Symbol::Alpha => 132,
-        Symbol::Square => 133,
-        Symbol::LineTop => 134, // ▔
-        Symbol::LineUpper1 => 135, // ⎺
-        Symbol::LineUpper2 => 136, // ⎻
-        Symbol::LineCenter => 137, // ⎯ or ASCII dash
-        Symbol::LineLower1 => 138, // ⎼
-        Symbol::LineLower2 => 139, // ⎽
-        Symbol::LineBottom => 140, // ▁ or ASCII underscore
-        Symbol::BoxDrawningLightUp => 141, // ╵ or ASCII |
-        Symbol::ZeroWithTraillingDot => 142,
-        Symbol::LineLeft => 152, // ▏
-        Symbol::LineLeft1 => 153,
-        Symbol::LineVerticalCenter => 154, // ⎪
-        Symbol::LineRight1 => 155,
-        Symbol::LineRight => 156, // ▕
+        Symbol::Antenna => 1,
+        Symbol::Battery => 2,
+        Symbol::BoxDrawningLightUp => 3, // ╵ or ASCII |
+        Symbol::VeclocityVector => 4,
+        Symbol::Alpha => 5,
+        Symbol::Square => 6,
+        Symbol::LineTop => 128, // ▔
+        Symbol::LineUpper1 => 129, // ⎺
+        Symbol::LineUpper2 => 130, // ⎻
+        Symbol::LineCenter => 131, // ⎯ or ASCII dash
+        Symbol::LineLower1 => 132, // ⎼
+        Symbol::LineLower2 => 133, // ⎽
+        Symbol::LineBottom => 134, // ▁ or ASCII underscore
+        Symbol::LineLeft => 135, // ▏
+        Symbol::LineLeft1 => 136,
+        Symbol::LineVerticalCenter => 137, // ⎪
+        Symbol::LineRight1 => 138,
+        Symbol::LineRight => 139, // ▕
+        Symbol::ZeroWithTraillingDot => 144,
     }
 }

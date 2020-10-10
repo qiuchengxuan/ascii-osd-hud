@@ -27,7 +27,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for GForce {
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
         let mut string: String<U5> = String::new();
-        write!(string, "g{:4}", telemetry.g_force).ok();
+        write!(string, "G{:4}", telemetry.g_force).ok();
         buffer[..5].copy_from_slice(string.as_bytes());
         buffer[3] = to_number_with_dot(buffer[3], self.zero_dot);
         1
@@ -50,11 +50,11 @@ mod test {
         let mut telemetry = Telemetry::default();
         telemetry.g_force = 11;
         g_force.draw(&telemetry, &mut buffer);
-        assert_eq!("g  ⒈1 ", to_utf8_string(&buffer));
+        assert_eq!("G  ⒈1 ", to_utf8_string(&buffer));
 
         buffer[0].zero();
         telemetry.g_force = 9;
         g_force.draw(&telemetry, &mut buffer);
-        assert_eq!("g  ₀9 ", to_utf8_string(&buffer));
+        assert_eq!("G  ₀9 ", to_utf8_string(&buffer));
     }
 }
