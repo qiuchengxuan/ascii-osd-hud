@@ -136,7 +136,7 @@ impl HUD {
             }
         });
         let output_len = output.len();
-        let mut indexes: EnumMap<Align, usize> = EnumMap::new();
+        let mut indexes: EnumMap<Align, usize> = EnumMap::default();
         for (display, align_option) in self.aligns.iter() {
             let align = match align_option {
                 Some(align) => *align,

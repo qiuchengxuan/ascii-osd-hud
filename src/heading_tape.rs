@@ -70,7 +70,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
 
 fn draw_heading(output: &mut [u8], heading: u16) {
     output[..3].copy_from_slice(b"000");
-    let string: String<U5> = heading.into();
+    let string: String<U5> = (heading % 360).into();
     let bytes = string.as_bytes();
     output[(3 - bytes.len())..3].copy_from_slice(bytes);
 }
@@ -109,7 +109,18 @@ mod test {
     use crate::telemetry::Telemetry;
     use crate::test_utils::{to_utf8_string, ZeroSlice};
 
-    use super::{HeadingTape, HEADING_TAPE_WIDTH};
+    use super::{draw_heading, HeadingTape, HEADING_TAPE_WIDTH};
+
+    #[test]
+    fn test_draw_heading() {
+        let mut buf = [0u8; 3];
+        draw_heading(&mut buf, 0);
+        assert_eq!(&buf, b"000");
+        draw_heading(&mut buf, 359);
+        assert_eq!(&buf, b"359");
+        draw_heading(&mut buf, 360);
+        assert_eq!(&buf, b"000");
+    }
 
     #[test]
     fn test_000_center_and_conflict_symbol() {
