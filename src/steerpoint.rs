@@ -1,6 +1,5 @@
 use core::fmt::Write;
 
-use heapless::consts::U8;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -35,14 +34,14 @@ impl<T: AsMut<[u8]>> Drawable<T> for Steerpoint {
         let hours = (time_to_go / 3600) as u8;
         let minutes = (time_to_go / 60 % 60) as u8;
         let seconds = (time_to_go % 60) as u8;
-        let mut string: String<U8> = String::new();
+        let mut string: String<8> = String::new();
         write!(string, "{:02}:{:02}:{:02}", hours, minutes, seconds).ok();
         buffer[buffer_len - 8..].copy_from_slice(string.as_bytes());
 
         // distance
         let buffer = output[last_index - 1].as_mut();
         let rho = steerpoint.coordinate.rho;
-        let mut string: String<U8> = String::new();
+        let mut string: String<8> = String::new();
         if steerpoint.coordinate.rho < 100 {
             write!(string, "{}{}", rho, telemetry.unit.distance()).ok();
             let bytes = string.as_bytes();
@@ -56,7 +55,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Steerpoint {
 
         // number and name
         let buffer = output[last_index - 2].as_mut();
-        let mut string: String<U8> = String::new();
+        let mut string: String<8> = String::new();
         write!(string, "{}/{:4}", steerpoint.number, steerpoint.name).ok();
         let bytes = string.as_bytes();
         buffer[buffer_len - bytes.len()..].copy_from_slice(bytes);

@@ -127,11 +127,10 @@ impl HUD {
         output: &'b mut [B],
     ) -> &'b [B] {
         output.iter_mut().for_each(|line| {
-            for x in line.as_mut() {
-                if *x == b' ' {
-                    *x = 0
-                } else if *x > 0 {
-                    *x = b' '
+            for ch in line.as_mut() {
+                *ch = match *ch {
+                    b' ' | 0 => 0,
+                    _ => b' ',
                 }
             }
         });
@@ -169,12 +168,13 @@ impl HUD {
 
 #[cfg(test)]
 mod test {
+    use fixed_point::fixed;
+
+    use super::HUD;
     use crate::symbol::default_symbol_table;
     use crate::telemetry::{Attitude, Notes, SphericalCoordinate, Steerpoint, Telemetry};
     use crate::test_utils::{fill_edge, to_utf8_string};
     use crate::{AspectRatio, PixelRatio};
-
-    use super::HUD;
 
     fn default_telemetry() -> Telemetry<'static> {
         Telemetry {
@@ -184,8 +184,8 @@ mod test {
                 roll: 10,
             },
             heading: 10,
-            aoa: 31,
-            g_force: 11,
+            aoa: fixed!(3.1),
+            g_force: fixed!(1.1),
             height: 99,
             notes: Notes {
                 left: "MAN",

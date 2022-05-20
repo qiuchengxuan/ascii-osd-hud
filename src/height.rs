@@ -1,4 +1,3 @@
-use heapless::consts::U6;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -25,7 +24,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Height {
         if self.0 == Align::Bottom {
             buffer = output[output.len() - 1].as_mut();
         }
-        let string: String<U6> = telemetry.height.into();
+        let string: String<6> = telemetry.height.into();
         let bytes = string.as_bytes();
         let offset = buffer.len() / 2 - bytes.len() / 2;
         buffer[offset..offset + bytes.len()].copy_from_slice(bytes);

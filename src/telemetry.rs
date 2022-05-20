@@ -1,3 +1,5 @@
+use fixed_point::{fixed, FixedPoint};
+
 #[derive(Copy, Clone, Debug)]
 pub struct Attitude {
     pub roll: i16, // [-180, 180], clock wise
@@ -77,15 +79,15 @@ pub struct Notes<'a> {
 
 #[derive(Copy, Clone, Debug)]
 pub struct Telemetry<'a> {
-    pub altitude: i16,      // feets or meters
-    pub aoa: i8,            // in degree*10
-    pub attitude: Attitude, // in degree
-    pub heading: u16,       // [0, 360), ref to north
-    pub battery: u8,        // percentage
-    pub g_force: u8,        // in g*10
-    pub height: i16,        // feets or meters, same with altitude, i16::MIN means N/A
-    pub notes: Notes<'a>,   //
-    pub rssi: u8,           // percentage
+    pub altitude: i16,              // feets or meters
+    pub aoa: FixedPoint<i8, 1>,     // in degree
+    pub attitude: Attitude,         // in degree
+    pub heading: u16,               // [0, 360), ref to north
+    pub battery: u8,                // percentage
+    pub g_force: FixedPoint<i8, 1>, // in g
+    pub height: i16,                // feets or meters, same with altitude, i16::MIN means N/A
+    pub notes: Notes<'a>,           //
+    pub rssi: u8,                   // percentage
     pub unit: Unit,
     pub speed_vector: SphericalCoordinate, // rho unit km/h or knot, theta ref to attitude
     pub vario: i16,                        // feets/min or m/s
@@ -98,9 +100,9 @@ impl<'a> Default for Telemetry<'a> {
             altitude: 0,
             attitude: Attitude::default(),
             heading: 0,
-            aoa: 0,
+            aoa: fixed!(0.0),
             battery: 100,
-            g_force: 0,
+            g_force: fixed!(1.0),
             height: 0,
             notes: Default::default(),
             rssi: 0,

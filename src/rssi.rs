@@ -1,4 +1,3 @@
-use heapless::consts::U3;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -26,7 +25,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for RSSI {
         let buffer = output[0].as_mut();
         buffer[0] = self.antenna;
         buffer[1..3].iter_mut().for_each(|b| *b = b' ');
-        let string: String<U3> = telemetry.rssi.into();
+        let string: String<3> = telemetry.rssi.into();
         let bytes = string.as_bytes();
         let offset = 4 - bytes.len();
         buffer[offset..offset + bytes.len()].copy_from_slice(bytes);
@@ -51,5 +50,8 @@ mod test {
         telemetry.rssi = 100;
         rssi.draw(&telemetry, &mut buffer);
         assert_eq!("⏉100", to_utf8_string(&buffer));
+        telemetry.rssi = 90;
+        rssi.draw(&telemetry, &mut buffer);
+        assert_eq!("⏉ 90", to_utf8_string(&buffer));
     }
 }

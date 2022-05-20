@@ -1,4 +1,3 @@
-use heapless::consts::U5;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -19,7 +18,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Speed {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        let string: String<U5> = telemetry.speed().into();
+        let string: String<5> = telemetry.speed().into();
         let bytes = string.as_bytes();
         let offset = 5 - bytes.len();
         buffer[offset..offset + bytes.len()].copy_from_slice(bytes);

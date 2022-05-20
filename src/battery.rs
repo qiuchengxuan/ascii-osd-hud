@@ -1,4 +1,3 @@
-use heapless::consts::U3;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -24,7 +23,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Battery {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        let string: String<U3> = telemetry.battery.into();
+        let string: String<3> = telemetry.battery.into();
         let bytes = string.as_bytes();
         let size = buffer.len();
         buffer[size - bytes.len() - 1] = self.battery;

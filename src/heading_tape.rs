@@ -1,7 +1,6 @@
 use core::cell::Cell;
 use core::cmp::{max, min};
 
-use heapless::consts::U5;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -70,7 +69,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for HeadingTape {
 
 fn draw_heading(output: &mut [u8], heading: u16) {
     output[..3].copy_from_slice(b"000");
-    let string: String<U5> = (heading % 360).into();
+    let string: String<5> = (heading % 360).into();
     let bytes = string.as_bytes();
     output[(3 - bytes.len())..3].copy_from_slice(bytes);
 }

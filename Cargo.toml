@@ -1,17 +1,18 @@
 [package]
 name = "ascii-osd-hud"
 description = "Ascii based OSD HUD implemention"
-version = "0.1.5"
+version = "0.2.0"
 authors = ["qiuchengxuan <qiuchengxuan@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-enum-map = {version = "0.6", default-features = false}
-heapless = "0.6"
+enum-map = { version = "2.4", default-features = false }
+heapless = "0.7"
 micromath = "2.0"
+fixed-point = { version = "1.0", default-features = false }
 
 [dev-dependencies]
 ascii = "1.0"

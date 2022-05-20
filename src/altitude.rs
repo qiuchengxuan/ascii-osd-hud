@@ -1,4 +1,3 @@
-use heapless::consts::U6;
 use heapless::String;
 
 use crate::drawable::{Align, Drawable, NumOfLine};
@@ -19,7 +18,7 @@ impl<T: AsMut<[u8]>> Drawable<T> for Altitude {
 
     fn draw(&self, telemetry: &Telemetry, output: &mut [T]) -> NumOfLine {
         let buffer = output[0].as_mut();
-        let string: String<U6> = telemetry.altitude.into();
+        let string: String<6> = telemetry.altitude.into();
         let bytes = string.as_bytes();
         let offset = buffer.len() - bytes.len();
         buffer[offset..].copy_from_slice(bytes);
